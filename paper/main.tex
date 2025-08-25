@@ -1,0 +1,52 @@
+\documentclass{article}
+
+\usepackage{misc/PRIMEarxiv}
+\usepackage{misc/options}
+
+% -----------------------------COURSEWORK  INFORMATION-----------------------------
+
+% Название работы
+\newcommand{\paperName}{
+    Исследование влияния модульной гибридизации на 
+    точность и эффективность трансформеров для 
+    долгосрочного прогнозирования временных рядов
+} 
+
+% Имя студента
+\newcommand{\studentName}{Очкин Н.В.}
+
+% Имя руководителя НИР
+\newcommand{\teacherName}{Зубарев К.М.}
+
+% --------------------------------------START--------------------------------------
+
+\begin{document}
+
+% -----------------------------------frontmatter-----------------------------------
+
+\input{frontmatter/titlepage}
+
+% -----------------------------------mainmatter-----------------------------------
+
+\input{content/introduction}
+
+% Related Work? 
+
+% main part: Методы исследования (Какую модель строим, какая архитектура, ...)
+\input{content/methodology}
+
+\input{content/experiment} % includes ablations and results
+
+\input{content/conclusion}
+
+% -----------------------------------backmatter-----------------------------------
+
+\appendix
+
+\input{backmatter/literature}
+
+\input{backmatter/appendixA}
+
+\input{backmatter/appendixB}
+
+\end{document}

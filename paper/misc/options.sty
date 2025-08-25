@@ -1,0 +1,130 @@
+% ==================================================
+
+% document parameters
+\usepackage[utf8]{inputenc}
+\usepackage[english, russian]{babel}
+
+% ==================================================
+
+% Packages for math
+\usepackage{amsmath, amssymb, amsthm, bm}
+% ==================================================
+
+% Packages for writing
+\usepackage{enumerate}
+\usepackage{ulem}
+\usepackage{setspace}
+\usepackage{fontspec}
+\usepackage{chngcntr}
+\usepackage{csquotes}    
+\usepackage{quoting}  
+\usepackage{booktabs}
+\usepackage{lmodern}
+\usepackage{parskip}
+
+% ==================================================
+
+% Miscellaneous packages
+\usepackage{float}
+\usepackage{xifthen}
+\usepackage{adjustbox}
+\usepackage{tocloft}
+\usepackage{lipsum}
+\usepackage{titlesec}
+\usepackage{multirow}
+\usepackage[shortlabels]{enumitem}
+\usepackage{indentfirst}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage[margin=1.25cm]{caption}
+\usepackage{cite}
+\usepackage{hyperref}
+\usepackage{subcaption}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{tikz}
+\usepackage[framemethod=TikZ]{mdframed}
+\usepackage{framed}
+\usepackage{makecell}
+% load an additional tikz library
+\usetikzlibrary{shapes.geometric}
+% ==================================================
+
+% Commands
+\newcommand*{\rom}[1]{\expandafter\@slowromancap\romannumeral #1@}
+\newcommand{\high}[1]{\textsc{\footnotesize #1}}
+
+\newcommand*{\defeq}{\stackrel{\scalebox{0.6}[0.6]{\text{def}}}{=}}
+
+% ==================================================
+
+% Constants
+
+\newcommand{\IndentSize}{1.5em}
+\newcommand{\LineSpreadSize}{1.12}
+
+% ==================================================
+
+% general document setup
+
+\setmainfont{Times New Roman}
+% \setmainfont{Verdana}
+
+\sloppy % Reduce overfull \hbox{} warnings
+
+\DeclareMathSizes{12}{14}{10}{8}
+
+\graphicspath{ {./images/} }
+\setlength{\parindent}{0pt}
+\linespread{\LineSpreadSize}
+
+% Decrease vspace before and after equation env
+\expandafter\def\expandafter\normalsize\expandafter{%
+  \setlength\abovedisplayshortskip{-8pt}%
+  \setlength\belowdisplayshortskip{10pt}%
+}
+
+% Связываем нумерацию рисунков с номером раздела
+\counterwithin{figure}{section}
+
+% Text size in captions (e.g. images)
+\captionsetup{font=footnotesize}
+
+% remove (a), (b), ... from subcaptions
+\captionsetup[subfigure]{labelformat=empty}
+
+% ==================================================
+
+% Extra
+
+% define definition/theorem environments
+\theoremstyle{definition}
+\newtheorem{definition}{Определение}
+
+\theoremstyle{plain} 
+\newtheorem{theorem}{Теорема}
+
+% Save the original definition of \input
+\let\originalinput\input
+
+% add \newpage after every input
+% \renewcommand{\input}[1]{\originalinput{#1}\newpage}
+
+% define custom colors
+\definecolor{myblue}{HTML}{0A88C2}
+\definecolor{myred}{HTML}{FF1B1C}
+\definecolor{mygreen}{HTML}{386641}
+
+% define the style for Python code
+\lstdefinestyle{mystyle}{
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{myblue},
+    stringstyle=\color{myred},
+    commentstyle=\color{green!50!black},
+    showstringspaces=false,
+    frame=leftline, 
+    framesep=10pt, 
+}
+
+% Set the style for Python code
+\lstset{style=mystyle, extendedchars=\true}

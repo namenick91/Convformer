@@ -1,0 +1,365 @@
+\section{Эксперимент}
+
+% Put MSE/MAE in main and all other metrics in appendix
+
+\textbf{Датасет} $\quad$ Ниже приводится описание
+набора данных экспериментов: \textit{ETT}~\cite{informer} датасет 
+содержит информацию, собранную с электрических трансформаторов, 
+включая нагрузку и температуру масла, которые регистрировались каждые 
+15 минут в период с июля 2016 года по июль 2018 года. 
+
+% ETT
+% Informer vs Autoformer vs Performer vs Convformer | vs Reformer? vs Transformer?
+% on all horizons: 24, 48, 168, 336, 720
+% only MSE/MAE metrics here
+
+% \begin{table}[!ht]
+%     \centering
+%     % \scalebox{1.1}{%
+%     \resizebox{\textwidth}{!}{%
+%       \begin{tabular}{c|c| *{3}{c} *{3}{c} *{3}{c} *{3}{c}}
+%         \toprule
+%         \multicolumn{2}{c}{\multirow{2}{*}{Horizon}} &
+%         \multicolumn{3}{c}{Convformer} & 
+%         \multicolumn{3}{c}{Informer}   & 
+%         \multicolumn{3}{c}{Performer}  & 
+%         \multicolumn{3}{c}{Autoformer} \\
+%         \cmidrule(lr){3-5} \cmidrule(lr){6-8} \cmidrule(lr){9-11} \cmidrule(lr){12-14}
+%           \multicolumn{2}{c}{} 
+%             & MSE & MAE & $t$
+%             & MSE & MAE & $t$
+%             & MSE & MAE & $t$
+%             & MSE & MAE & $t$ \\
+%         \toprule
+%         \multirow{5}{*}{\rotatebox{90}{ETTh1}} 
+%                           & 24   & 0.388 & 0.428 & 3m50s/4s & 0.524 & 0.527 & 2m5s/3s & 0.598 & 0.570 & 2m50s/4s & 0.401 & 0.425 & 3m58s/7s \\
+%                           & 48   & 0.435 & 0.451 & 3m55s/4s & 0.631 & 0.601 & 2m24s/4s & 0.765 & 0.673 & 2m35s/4s & 0.430 & 0.445 & 4m43s/7s \\
+%                           & 168  & 0.435 & 0.459 & 8m39s/6s & 0.825 & 0.705 & 3m14s/5s & 0.918 & 0.768 & 3m42s/6s & 0.478 & 0.473 & 6m45s/11s \\
+%                           & 336  & 0.469 & 0.490 & 7m55s/8s & 1.310 & 0.937 & 9m19s/6s & 1.024 & 0.823 & 5m36s/7s & 0.516 & 0.497 & 10m19s/17s \\
+%                           & 720  & 0.510 & 0.528 & 12m51s/10s & 1.205 & 0.879 & 14m36s/9s & 1.107 & 0.843 & 14m9s/9s & - & - & - \\
+%         \midrule
+%         \multirow{5}{*}{\rotatebox{90}{ETTh2}} 
+%                           & 24   & - & - & - & - & - & - & - & - & - & - & - & - \\
+%                           & 48   & - & - & - & - & - & - & - & - & - & - & - & - \\
+%                           & 168  & - & - & - & - & - & - & - & - & - & - & - & - \\
+%                           & 336  & - & - & - & - & - & - & - & - & - & - & - & - \\
+%                           & 720  & - & - & - & - & - & - & - & - & - & - & - & - \\
+%         \midrule
+%         \multirow{5}{*}{\rotatebox{90}{ETTm1}} 
+%                           & 24   & - & - & - & - & - & - & - & - & - & - & - & - \\
+%                           & 48   & - & - & - & - & - & - & - & - & - & - & - & - \\
+%                           & 168  & - & - & - & - & - & - & - & - & - & - & - & - \\
+%                           & 336  & - & - & - & - & - & - & - & - & - & - & - & - \\
+%                           & 720  & - & - & - & - & - & - & - & - & - & - & - & - \\
+%         \midrule
+%         \multirow{5}{*}{\rotatebox{90}{ETTm2}} 
+%                           & 24   & - & - & - & - & - & - & - & - & - & - & - & - \\
+%                           & 48   & - & - & - & - & - & - & - & - & - & - & - & - \\
+%                           & 168  & - & - & - & - & - & - & - & - & - & - & - & - \\
+%                           & 336  & - & - & - & - & - & - & - & - & - & - & - & - \\
+%                           & 720  & - & - & - & - & - & - & - & - & - & - & - & - \\
+%         \bottomrule
+%       \end{tabular}%
+%     }
+%     \vspace{3pt}
+%     \caption{Результаты многомерных предсказаний на {\color{red} n} датасетах ETT с 
+%     горизонтами предсказаний: \{ 24, 48, 168, 336, 720 \}. 
+%     Мы фиксируем входную длину последовательностей у моделей как 96.}
+%     \label{tab:ett}
+% \end{table}
+
+\begin{table}[!ht]
+    \centering
+    % \scalebox{1.1}{%
+    \resizebox{\textwidth}{!}{%
+      \begin{tabular}{c|c| *{3}{c} *{3}{c} *{3}{c} *{3}{c}}
+        \toprule
+        \multicolumn{2}{c}{\multirow{2}{*}{Horizon}} &
+        \multicolumn{3}{c}{\textbf{Convformer}} & 
+        \multicolumn{3}{c}{Informer}   & 
+        \multicolumn{3}{c}{Performer}  & 
+        \multicolumn{3}{c}{Autoformer} \\
+        \cmidrule(lr){3-5} \cmidrule(lr){6-8} \cmidrule(lr){9-11} \cmidrule(lr){12-14}
+          \multicolumn{2}{c}{} 
+            & MSE & MAE & $t$
+            & MSE & MAE & $t$
+            & MSE & MAE & $t$
+            & MSE & MAE & $t$ \\
+        \toprule
+        \multirow{5}{*}{\rotatebox{90}{ETTh1}} 
+                          & 24   & \textbf{0.388} & 0.428 & 3m50s/4s & 0.524 & 0.527 & \textbf{2m5s/3s} & 0.598 & 0.570 & 2m50s/4s & 0.401 & \textbf{0.425} & 3m58s/7s \\
+                          & 48   & 0.435 & 0.451 & 3m55s/4s & 0.631 & 0.601 & \textbf{2m24s/4s} & 0.765 & 0.673 & 2m35s/4s & \textbf{0.430} & \textbf{0.445} & 4m43s/7s \\
+                          & 168  & \textbf{0.435} & \textbf{0.459} & 8m39s/6s & 0.825 & 0.705 & \textbf{3m14s/5s} & 0.918 & 0.768 & 3m42s/6s & 0.478 & 0.473 & 6m45s/11s \\
+                          & 336  & \textbf{0.469} & \textbf{0.490} & 7m55s/8s & 1.310 & 0.937 & 9m19s/6s & 1.024 & 0.823 & \textbf{5m36s/7s} & 0.516 & 0.497 & 10m19s/17s \\
+                          & 720  & \textbf{0.510} & \textbf{0.528} & \textbf{12m51s/10s} & 1.205 & 0.879 & 14m36s/9s & 1.107 & 0.843 & 14m9s/9s & - & - & - \\
+        \midrule
+        \multirow{5}{*}{\rotatebox{90}{ETTh2}} 
+                          & 24   & \textbf{0.248} & \textbf{0.345} & 2m38s/4s & 1.284 & 0.891 & \textbf{1m58s/3s} & 1.296 & 0.907 & 2m49s/4s & 0.290 & 0.365 & 4m7s/6s \\
+                          & 48   & \textbf{0.298} & \textbf{0.373} & 2m49s/5s & 1.559 & 1.008 & \textbf{1m58s/4s} & 1.568 & 1.008 & 2m35s/4s & 0.324 & 0.382 & 3m31s/6s \\
+                          & 168  & 0.539 & 0.509 & 4m6s/6s & 7.587 & 2.335 & \textbf{2m49s/5s} & 8.487 & 2.569 & 3m40s/6s & \textbf{0.451} & \textbf{0.456} & 5m15s/9s \\
+                          & 336  & 0.684 & 0.600 & 7m9s/8s & 4.369 & 1.773 & \textbf{4m19s/7s} & 8.158 & 2.456 & 6m16s/7s & \textbf{0.478} & \textbf{0.480} & 7m3s/13s \\
+                          & 720  & \textbf{0.662} & \textbf{0.595} & 13m1s/11s & 2.977 & 1.467 & \textbf{6m1s/9s} & 3.707 & 1.640 & 7m39s/9s & - & - & - \\
+        % \midrule
+        % \multirow{5}{*}{\rotatebox{90}{ETTm1}} 
+        %                   & 24   & - & - & - & - & - & - & - & - & - & - & - & - \\
+        %                   & 48   & - & - & - & - & - & - & - & - & - & - & - & - \\
+        %                   & 168  & - & - & - & - & - & - & - & - & - & - & - & - \\
+        %                   & 336  & - & - & - & - & - & - & - & - & - & - & - & - \\
+        %                   & 720  & - & - & - & - & - & - & - & - & - & - & - & - \\
+        % \midrule
+        % \multirow{5}{*}{\rotatebox{90}{ETTm2}} 
+        %                   & 24   & - & - & - & - & - & - & - & - & - & - & - & - \\
+        %                   & 48   & - & - & - & - & - & - & - & - & - & - & - & - \\
+        %                   & 168  & - & - & - & - & - & - & - & - & - & - & - & - \\
+        %                   & 336  & - & - & - & - & - & - & - & - & - & - & - & - \\
+        %                   & 720  & - & - & - & - & - & - & - & - & - & - & - & - \\
+        \bottomrule
+      \end{tabular}%
+    }
+    \vspace{3pt}
+    \caption{Результаты многомерных предсказаний на 2 датасетах ETT с 
+    горизонтами предсказаний: \{ 24, 48, 168, 336, 720 \}. 
+    Мы фиксируем входную длину последовательностей у моделей как 96.
+    Символ “–” обозначает выход за пределы памяти (OOM).
+    Время указано как train/inference.
+    Полный бенчмарк см. в табл.~\ref{tab:ett-xl}.
+    Примеры визуализации приведены  на рис.~\ref{fig:four_images}.}
+    \label{tab:ett}
+\end{table}
+
+\textbf{Детали реализации} $\quad$ Обучение проводилось с использованием функции потерь MSE (L2) 
+и оптимизатора Adam~\cite{adam} с начальной скоростью обучения $10^{-4}$. 
+Размер батча - $32$. Процесс обучения досрочно останавливается в пределах 
+$10$ эпох. 
+Результаты экспериментов были получены в ходе усреднения по трем отдельным запускам, 
+реализованы в PyTorch~\cite{pytorch} и проводились на 
+одной графической карте NVIDIA GTX 1660 SUPER с 6 ГБ видеопамяти. 
+% { \color{red} 
+% Гиперпараметр $r$ механизма внимания FAVOR+ варьировался в диапазоне от ? до ? для балансировки 
+% качества и вычислительной эффективности. Стандартные отклонения и анализ чувствительности 
+% приведены в Приложениях ? и ?.}
+Архитектура модели включает 2 слоя энкодера и 1 слой декодера.
+Полный перечень гиперпараметров и конфигураций приведён в репозитории (\href{https://github.com/namenick91/Convformer}{GitHub}).
+
+\subsection{Абляционные исследования}
+
+\label{sec:ablations1}
+\textbf{ConvStem вместо TokenEmbedding} $\quad$ Сравнивалась эффективность 
+оригинальной модели Informer~\cite{informer} и её модификации с 
+расширенным слоем эмбеддинга \ref{tab:etth1-convstem}.
+
+% Informer vs Informer_Convstem
+% on all horizons: 24, 48, 168, 336, 720
+% only MSE/MAE metrics here
+
+\begin{table}[!ht]
+    \centering
+    \begin{tabular}{c| ccc ccc}
+    \toprule
+    \multicolumn{1}{c}{\multirow{2}{*}{Horizon}} & 
+    \multicolumn{3}{c}{Informer}                 & 
+    \multicolumn{3}{c}{\textbf{ConvStem}}                 \\
+    \cmidrule(lr){2-4} \cmidrule(lr){5-7}
+    \multicolumn{1}{c}{} & {MSE} & {MAE} & {$t$} & {MSE} & {MAE} & {$t$} \\
+    \midrule
+    24   & 0.524 & 0.527 & \textbf{2m5s/3s} & \textbf{0.469} & \textbf{0.480} & 2m11s/4s \\
+    48   & 0.631 & 0.601 & 2m24s/4s & \textbf{0.587} & \textbf{0.558} & \textbf{2m23s/4s} \\
+    168  & \textbf{0.825} & \textbf{0.705} & \textbf{3m14s/5s} & 0.861 & 0.733 & 3m34s/5s \\
+    336  & 1.310 & 0.937 & 9m19s/6s & \textbf{1.094} & \textbf{0.843} & \textbf{7m22s/7s} \\
+    720  & \textbf{1.205} & \textbf{0.879} & 14m36s/9s & 1.261 & 0.913 & \textbf{9m58s/9s} \\
+    \bottomrule
+    \end{tabular}
+    \vspace{3pt}
+    \caption{Результаты многомерных предсказаний на датасете ETTh1 с 
+    горизонтами предсказаний: \{ 24, 48, 168, 336, 720 \}. 
+    Входная длина последовательности фиксирована: 96.
+    Время указано как train/inference.
+    Примеры визуализации приведены в табл.~\ref{tab:ablations1}.}
+    \label{tab:etth1-convstem}
+\end{table}
+
+Встраивание компактного сверточного блока на вход приводит к заметному улучшению качества на коротких 
+(24-48) и особенно длинных горизонтах (336), при этом затраты по времени остаются сопоставимыми. 
+Однако на отдельных горизонтах (например, 168) Informer~\cite{informer} сохраняет преимущество. 
+Это подтверждает, 
+что сверточная фильтрация локальных паттернов в среднем повышает устойчивость к краткосрочной 
+нестационарности, хотя её вклад не универсален.
+
+\label{sec:ablations2}
+\textbf{ProbSparse $\to$ FAVOR+} $\quad$ Сравнивалась эффективность 
+Informer~\cite{informer} с исходным механизмом ProbSparse и модифицированной версии, 
+в которой ProbSparse заменён на FAVOR+ (Performer~\cite{performer}).
+
+% Informer vs Informer_FAVOR vs Performer
+% on all horizons: 24, 48, 168, 336, 720
+% only MSE/MAE metrics here
+
+% with Informer, Performer and Informer_FAVOR 
+% \begin{table}[!ht]
+%     \centering
+%     \begin{tabular}{c| ccc  ccc  ccc}
+%     \toprule
+%     \multicolumn{1}{c}{\multirow{2}{*}{Horizon}}  
+%       & \multicolumn{3}{c}{\textbf{Informer}}
+%       & \multicolumn{3}{c}{Performer}
+%       & \multicolumn{3}{c}{\textbf{Informer w/ FAVOR+}} \\
+%     \cmidrule(lr){2-4} \cmidrule(lr){5-7} \cmidrule(lr){8-10}
+%     \multicolumn{1}{c}{} & {MSE} & {MAE} & {$t$} & {MSE} & {MAE} & {$t$} & {MSE} & {MAE} & {$t$} \\
+%     \midrule
+%     24   & 0.524 & 0.527 & \textbf{2m5s/3s} & 0.598 & 0.570 & 2m50s/4s & \textbf{0.494} & \textbf{0.505} & 2m30s/4s \\
+%     48   & \textbf{0.631} & \textbf{0.601} & 2m24s/4s & 0.765 & 0.673 & 2m35s/4s & 0.710 & 0.640 & \textbf{2m20s/4s} \\
+%     168  & \textbf{0.825} & \textbf{0.705} & \textbf{3m14s/5s} & 0.918 & 0.768 & 3m42s/6s & 0.864 & 0.746 & 3m24s/5s \\
+%     336  & 1.310 & 0.937 & 9m19s/6s & \textbf{1.024} & \textbf{0.823} & \textbf{5m36s/7s} & 1.088 & 0.846 & 6m22s/7s \\
+%     720  & 1.205 & 0.879 & 14m36s/9s & 1.107 & 0.843 & 14m9s/9s & \textbf{1.065} & \textbf{0.831} & \textbf{9m54s/9s} \\
+%     \bottomrule
+%     \end{tabular}
+%     \vspace{3pt}
+%     \caption{Результаты многомерных предсказаний на датасете ETTh1 с 
+%     горизонтами предсказаний: \{ 24, 48, 168, 336, 720 \}. 
+%     Мы фиксируем входную длину последовательностей у моделей как 96.}
+%     \label{tab:etth1-convstem}
+% \end{table}
+
+% with Informer and Informer_FAVOR 
+\begin{table}[!ht]
+    \centering
+    \begin{tabular}{c| ccc  ccc}
+    \toprule
+    \multicolumn{1}{c}{\multirow{2}{*}{Horizon}}  
+      & \multicolumn{3}{c}{Informer}
+      & \multicolumn{3}{c}{\textbf{Informer w/ FAVOR+}} \\
+    \cmidrule(lr){2-4} \cmidrule(lr){5-7}
+    \multicolumn{1}{c}{} & {MSE} & {MAE} & {$t$} & {MSE} & {MAE} & {$t$} \\
+    \midrule
+    24   & 0.524 & 0.527 & \textbf{2m5s/3s} & \textbf{0.494} & \textbf{0.505} & 2m30s/4s \\
+    48   & \textbf{0.631} & \textbf{0.601} & 2m24s/4s & 0.710 & 0.640 & \textbf{2m20s/4s} \\
+    168  & \textbf{0.825} & \textbf{0.705} & \textbf{3m14s/5s} & 0.864 & 0.746 & 3m24s/5s \\
+    336  & 1.310 & 0.937 & 9m19s/6s & \textbf{1.088} & \textbf{0.846} & \textbf{6m22s/7s} \\
+    720  & 1.205 & 0.879 & 14m36s/9s & \textbf{1.065} & \textbf{0.831} & \textbf{9m54s/9s} \\
+    \bottomrule
+    \end{tabular}
+    \vspace{3pt}
+    \caption{Результаты многомерных предсказаний на датасете ETTh1 с 
+    горизонтами предсказаний: \{ 24, 48, 168, 336, 720 \}. 
+    Входная длина последовательности фиксирована: 96.
+    Время указано как train/inference.
+    Примеры визуализации приведены в табл.~\ref{tab:ablations2}.}
+    \label{tab:etth1-favor}
+\end{table}
+
+Линейное внимание обеспечивает выигрыш по качеству на длинных горизонтах (336, 720) 
+при сопоставимых или меньших вычислительных затратах, в то время как на коротких горизонтах 
+улучшение выражено слабее или отсутствует. Таким образом, FAVOR+~\cite{performer} даёт наибольший эффект именно 
+в режимах, где глобальные зависимости становятся критичными, подтверждая его ценность 
+для масштабируемого долгосрочного прогнозирования.
+
+\label{sec:ablations3}
+\textbf{Informer с модулем декомпозиции} $\quad$ Сравнивалась эффективность 
+оригинальной модели Informer~\cite{informer} и модификации, дополненной механизмом 
+декомпозиции ряда из Autoformer~\cite{autoformer}.
+
+% Informer vs Informer_Decomp vs Autoformer
+% on all horizons: 24, 48, 168, 336, 720
+% only MSE/MAE metrics here
+
+% with Informer, Autoformer and Informer_Decomp on 2 datasets
+% Ambiguity Alert
+% - Dataset 'Synth' in the table was matched with 'Custom' from the results.md file.
+% \begin{table}[!ht]
+%     \centering
+%       \begin{tabular}{c|c| *{3}{c} *{3}{c} *{3}{c}}
+%         \toprule
+%         \multicolumn{2}{c}{\multirow{2}{*}{Horizon}} &
+%         \multicolumn{3}{c}{\textbf{Informer}}   & 
+%         \multicolumn{3}{c}{Autoformer} &
+%         \multicolumn{3}{c}{Informer w/ s.decomp} \\ 
+%         \cmidrule(lr){3-5} \cmidrule(lr){6-8} \cmidrule(lr){9-11}
+%           \multicolumn{2}{c}{} & \multicolumn{1}{c}{MSE} & \multicolumn{1}{c}{MAE} & \multicolumn{1}{c}{$t$}
+%             & \multicolumn{1}{c}{MSE} & \multicolumn{1}{c}{MAE} & \multicolumn{1}{c}{$t$}
+%             & \multicolumn{1}{c}{MSE} & \multicolumn{1}{c}{MAE} & \multicolumn{1}{c}{$t$} \\
+%         \toprule
+%         \multirow{5}{*}{\rotatebox{90}{ETTh1}} & 24   & 0.524 & 0.527 & \textbf{2m5s/3s} & \textbf{0.401} & \textbf{0.425} & 3m58s/7s & 0.478 & 0.494 & 3m36s/4s \\
+%                           & 48   & 0.631 & 0.601 & \textbf{2m24s/4s} & \textbf{0.430} & \textbf{0.445} & 4m43s/7s & 0.561 & 0.547 & 3m4s/4s \\
+%                           & 168  & 0.825 & 0.705 & \textbf{3m14s/5s} & \textbf{0.478} & \textbf{0.473} & 6m45s/11s & 0.649 & 0.597 & 7m2s/5s \\
+%                           & 336  & 1.310 & 0.937 & \textbf{9m19s/6s} & \textbf{0.516} & \textbf{0.497} & 10m19s/17s & 0.952 & 0.748 & 10m55s/7s \\
+%                           & 720  & 1.205 & 0.879 & \textbf{14m36s/9s} & - & - & - & \textbf{1.059} & \textbf{0.775} & 16m46s/10s \\
+%         \midrule
+%         \multirow{5}{*}{\rotatebox{90}{Synth}} & 24   & \textbf{0.004} & \textbf{0.051} & \textbf{6m55s/5s} & 0.005 & 0.057 & 10m21s/10s & 0.006 & 0.062 & 7m19s/5s \\
+%                           & 48   & 0.005 & 0.059 & \textbf{7m29s/5s} & \textbf{0.005} & \textbf{0.053} & 13m4s/10s & 0.007 & 0.068 & 8m2s/5s \\
+%                           & 168  & \textbf{0.013} & \textbf{0.102} & \textbf{9m58s/7s} & 0.016 & 0.102 & 17m2s/16s & 0.021 & 0.116 & 11m57s/7s \\
+%                           & 336  & 0.033 & 0.161 & \textbf{10m53s/9s} & \textbf{0.027} & \textbf{0.134} & 24m6s/25s & 0.051 & 0.183 & 16m51s/10s \\
+%                           & 720  & \textbf{0.123} & \textbf{0.310} & \textbf{17m20s/13s} & - & - & - & 0.184 & 0.345 & 26m36s/15s \\
+%         \bottomrule
+%       \end{tabular}%
+%     \vspace{3pt}
+%     \caption{Результаты многомерных предсказаний на {\color{red} n} датасетах ETT с 
+%     горизонтами предсказаний: \{ 24, 48, 168, 336, 720 \}. 
+%     Мы фиксируем входную длину последовательностей у моделей как 96.}
+%     \label{tab:ett}
+% \end{table}
+
+% with Informer and Informer_Decomp on 2 datasets
+% \begin{table}[!ht]
+%     \centering
+%       \begin{tabular}{c|c| *{3}{c} *{3}{c}}
+%         \toprule
+%         \multicolumn{2}{c}{\multirow{2}{*}{Horizon}} &
+%         \multicolumn{3}{c}{\textbf{Informer}}   & 
+%         \multicolumn{3}{c}{Informer w/ s.decomp} \\ 
+%         \cmidrule(lr){3-5} \cmidrule(lr){6-8}
+%           \multicolumn{2}{c}{} & \multicolumn{1}{c}{MSE} & \multicolumn{1}{c}{MAE} & \multicolumn{1}{c}{$t$}
+%             & \multicolumn{1}{c}{MSE} & \multicolumn{1}{c}{MAE} & \multicolumn{1}{c}{$t$} \\
+%         \toprule
+%         \multirow{5}{*}{\rotatebox{90}{ETTh1}} & 24   & 0.524 & 0.527 & \textbf{2m5s/3s} & \textbf{0.478} & \textbf{0.494} & 3m36s/4s \\
+%                           & 48   & 0.631 & 0.601 & \textbf{2m24s/4s} & \textbf{0.561} & \textbf{0.547} & 3m4s/4s \\
+%                           & 168  & 0.825 & 0.705 & \textbf{3m14s/5s} & \textbf{0.649} & \textbf{0.597} & 7m2s/5s \\
+%                           & 336  & 1.310 & 0.937 & \textbf{9m19s/6s} & \textbf{0.952} & \textbf{0.748} & 10m55s/7s \\
+%                           & 720  & 1.205 & 0.879 & \textbf{14m36s/9s} & \textbf{1.059} & \textbf{0.775} & 16m46s/10s \\
+%         \midrule
+%         \multirow{5}{*}{\rotatebox{90}{Synth}} & 24   & \textbf{0.004} & \textbf{0.051} & \textbf{6m55s/5s} & 0.006 & 0.062 & 7m19s/5s \\
+%                           & 48   & \textbf{0.005} & \textbf{0.059} & \textbf{7m29s/5s} & 0.007 & 0.068 & 8m2s/5s \\
+%                           & 168  & \textbf{0.013} & \textbf{0.102} & \textbf{9m58s/7s} & 0.021 & 0.116 & 11m57s/7s \\
+%                           & 336  & \textbf{0.033} & \textbf{0.161} & \textbf{10m53s/9s} & 0.051 & 0.183 & 16m51s/10s \\
+%                           & 720  & \textbf{0.123} & \textbf{0.310} & \textbf{17m20s/13s} & 0.184 & 0.345 & 26m36s/15s \\
+%         \bottomrule
+%       \end{tabular}%
+%     \vspace{3pt}
+%     \caption{Результаты многомерных предсказаний на {\color{red} n} датасетах ETT с 
+%     горизонтами предсказаний: \{ 24, 48, 168, 336, 720 \}. 
+%     Мы фиксируем входную длину последовательностей у моделей как 96.}
+%     \label{tab:ett}
+% \end{table}
+
+% with Informer and Informer_Decomp on 1 dataset
+\begin{table}[!ht]
+    \centering
+      \begin{tabular}{c|c| *{3}{c} *{3}{c}}
+        \toprule
+        \multicolumn{2}{c}{\multirow{2}{*}{Horizon}} &
+        \multicolumn{3}{c}{Informer}   & 
+        \multicolumn{3}{c}{\textbf{Informer w/ s.decomp}} \\ 
+        \cmidrule(lr){3-5} \cmidrule(lr){6-8}
+          \multicolumn{2}{c}{} & \multicolumn{1}{c}{MSE} & \multicolumn{1}{c}{MAE} & \multicolumn{1}{c}{$t$}
+            & \multicolumn{1}{c}{MSE} & \multicolumn{1}{c}{MAE} & \multicolumn{1}{c}{$t$} \\
+        \toprule
+        \multirow{5}{*}{\rotatebox{90}{ETTh1}} & 24   & 0.524 & 0.527 & \textbf{2m5s/3s} & \textbf{0.478} & \textbf{0.494} & 3m36s/4s \\
+                          & 48   & 0.631 & 0.601 & \textbf{2m24s/4s} & \textbf{0.561} & \textbf{0.547} & 3m4s/4s \\
+                          & 168  & 0.825 & 0.705 & \textbf{3m14s/5s} & \textbf{0.649} & \textbf{0.597} & 7m2s/5s \\
+                          & 336  & 1.310 & 0.937 & \textbf{9m19s/6s} & \textbf{0.952} & \textbf{0.748} & 10m55s/7s \\
+                          & 720  & 1.205 & 0.879 & \textbf{14m36s/9s} & \textbf{1.059} & \textbf{0.775} & 16m46s/10s \\
+        \bottomrule
+      \end{tabular}%
+    \vspace{3pt}
+    \caption{Результаты многомерных предсказаний на датасете ETTh1 с 
+    горизонтами предсказаний: \{ 24, 48, 168, 336, 720 \}. 
+    Входная длина последовательности фиксирована: 96.
+    Время указано как train/inference.
+    Примеры визуализации приведены в табл.~\ref{tab:ablations3}.}
+    \label{tab:etth1-decomp}
+\end{table}
+
+Встраивание операции разделения на тренд и остаток после каждого блока self-attention 
+приводит к систематическому снижению ошибок на всех горизонтах ETTh1, хотя ценой 
+становится рост времени обучения и инференса (inference). Это подтверждает гипотезу о том, что 
+явная стабилизация нестационарности улучшает обобщающую способность модели, особенно 
+при наличии сдвигов уровня и мультисезонности.

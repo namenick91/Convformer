@@ -1,0 +1,59 @@
+%Header
+\pagestyle{fancy}
+\thispagestyle{empty}
+\rhead{ \textit{ }} 
+
+% Update your Headers here
+% \fancyhead[LO]{Running Title for Header}
+% \fancyhead[RE]{Firstauthor and Secondauthor} % Firstauthor et al. if more than 2 - must use \documentclass[twoside]{article}
+
+%% Title
+\title{
+    \textbf{\paperName}
+    \thanks{Исходный код, конфигурации и скрипты обучения доступны: \href{https://github.com/namenick91/Convformer}{GitHub}.} 
+}
+
+\author{
+  \studentName \\
+  Affiliation \\
+  Univ \\
+  City\\
+  \texttt{email@email} \\
+    \And
+  \teacherName \\
+  Affiliation \\
+  Univ \\
+  City\\
+  \texttt{email@email} \\
+}
+
+% \begin{titlepage}
+\maketitle
+
+\begin{abstract}
+  Задача долгосрочного прогнозирования многомерных временных рядов остается 
+  сложной: в реальных данных наблюдается ряд проблемных эффектов - среди них, 
+  краткосрочные мотивы (скачки, ступени), 
+  крайне долгосрочные и межрядовые зависимости, выраженная нестационарность 
+  (сдвиги тренда/уровня, мультисезонность, гетероскедастичность).
+  В данной работе мы предлагаем расширить слой эмбеддинга в модели 
+  Informer~\cite{informer} компактным двухслойным сверточным блоком с целью 
+  повышения эффективности извлечения локальных паттернов, внедрить модуль
+  декомпозиции ряда из Autoformer~\cite{autoformer} для явного разделения 
+  трендовых и сезонных компонент и заменить механизм ProbSparse на линейное внимание FAVOR+
+  (Performer~\cite{performer}) для учёта глобальных зависимостей при низких 
+  вычислительных затратах.
+  Эксперименты на стандартных бенчмарках демонстрируют
+  снижение ошибок на длинных горизонтах прогнозирования в ряде настроек.
+  Абляционные исследования указывают на вклад каждого из модулей, 
+  хотя эффект не универсален для всех горизонтов. 
+  На рассмотренных конфигурациях наблюдается благоприятный компромисс между точностью 
+  и затратами времени/памяти.
+\end{abstract}
+
+% keywords can be removed
+\keywords{
+  LSTF \and Long Sequence Time-series Forecasting \and Transformer \and 
+  Informer \and Performer \and Autoformer
+}
+% \end{titlepage}
