@@ -1,6 +1,8 @@
 # A Study of Modular Hybridization for Accuracy and Efficiency of Transformers in Long-Term Time Series Forecasting
 A hybrid Transformer model combining a convolutional stem, linear attention (FAVOR+), and series decomposition for Long-Sequence Time-series Forecasting (LSTF).
 
+[📄 View the full paper (PDF)](./preprint.pdf)
+
 ## Overview
 Long-term forecasting of multivariate time series is challenging due to complex patterns in real-world data, such as short-term motifs, long-range cross-series dependencies, and pronounced non-stationarity (level shifts, multi-seasonality, heteroscedasticity). We propose an architecture that enhances the Informer model by integrating three key modules. We introduce a compact two-layer convolutional block (COnvStem) into the embedding layer to improve local pattern extraction. To explicitly handle trend and seasonal components, we incorporate a series decomposition module from Autoformer. Finally, we replace the ProbSparse attention mechanism with FAVOR+ linear attention to efficiently capture global dependencies with low computational cost. Experiments on standard ETT benchmarks indicate reduced errors at long prediction horizons in several settings. Ablation studies show each module contributes, though gains are not universal across horizons. Overall, the method offers a favorable accuracy–time/memory trade-off on the evaluated configurations.
 
