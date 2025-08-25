@@ -35,7 +35,7 @@ bash main.sh
 ## Main Results
 
 <p align="center">
-    <img src=".convformer\results.png" height = "550" alt="" align=center />
+    <img src=".\convformer\results.png" height = "550" alt="" align=center />
 </p>
 
 ## Limitations
