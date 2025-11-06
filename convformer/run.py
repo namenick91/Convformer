@@ -1,6 +1,6 @@
 import logging
 logging.basicConfig(
-    level=logging.WARNING,
+    level=logging.INFO, # was WARNING
     format="%(asctime)s.%(msecs)03d %(levelname)-8s %(name)s "
            "[%(filename)s:%(lineno)d %(funcName)s] %(message)s",
     datefmt="%d-%m-%YT%H:%M:%S",
@@ -92,7 +92,7 @@ def main():
 
     # optimization
     parser.add_argument('--num_workers', type=int, default=10, help='data loader num workers')
-    parser.add_argument('--itr', type=int, default=2, help='experiments times')
+    parser.add_argument('--itr', type=int, default=3, help='experiments times')
     parser.add_argument('--train_epochs', type=int, default=10, help='train epochs')
     parser.add_argument('--batch_size', type=int, default=32, help='batch size of train input data')
     parser.add_argument('--patience', type=int, default=3, help='early stopping patience')
@@ -124,6 +124,9 @@ def main():
 
     args.use_torch_compile = args.use_torch_compile and hasattr(torch, 'compile')
     assert args.d_model % args.n_heads == 0, "d_model must be divisible by n_heads"
+
+    print('args in experiment:')
+    print(args)
 
     logging.info('args in experiment:')
     logging.info(args)
@@ -158,6 +161,7 @@ def main():
         return out, {"seconds": secs, "readable": f"{minutes}m {rem:.3f}s"}
     
     if args.is_training:
+        print(f'args.itr = {args.itr}')
         for ii in range(args.itr):
             # setting record of experiments
             setting = (

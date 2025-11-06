@@ -1,6 +1,6 @@
 import logging
 logging.basicConfig(
-    level=logging.WARNING,
+    level=logging.INFO,  # was WARNING
     format="%(asctime)s.%(msecs)03d %(levelname)-8s %(name)s "
            "[%(filename)s:%(lineno)d %(funcName)s] %(message)s",
     datefmt="%d-%m-%YT%H:%M:%S",
