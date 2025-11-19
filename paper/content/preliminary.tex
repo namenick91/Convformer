@@ -22,17 +22,18 @@ $
 в каждый момент времени соответственно.
 Дальнейшие рассуждения одинаково применимы к многомерному и одномерному случаям; различие заключается лишь в выборе \(C_{\text{out}}\) и в том, 
 какие компоненты \(\mathbf{x}_t\) считаются таргетами.
+
 Задача LSTF формулируется как задача обучения параметризованного отображения
 $
 f_\theta: \mathbb{R}^{L_x \times C_{\text{in}}} \rightarrow \mathbb{R}^{L_y \times C_{\text{out}}},
 $
 которое по входному окну наблюдений \(\mathcal{X}_{t}\) восстанавливает
 соответствующую ему последовательность будущих значений \(\mathcal{Y}_{t}\):\quad
-$
+\begin{equation*}
 \hat{\mathcal{Y}}_{t}
 = f_\theta\left( \mathcal{X}_{t} \right)
 \approx \mathcal{Y}_{t}.
-$
+\end{equation*}
 Задача LSTF предполагает предсказание далёкого будущего, то есть больших значений \(L_y\); при этом размерность признаков не ограничивается одномерным случаем.
 Пусть обучающая выборка состоит из набора окон
 $
@@ -54,3 +55,97 @@ f_\theta \left( \mathcal{X}_{t} \right)
 В дальнейшем под \(f_\theta\) рассматриваются как базовые трансформерные архитектуры Informer, Performer и Autoformer, так и предлагаемые в данной работе модификации. 
 Все модели обучаются в единой постановке, отличаясь лишь внутренней реализацией отображения \(f_\theta\) при фиксированных 
 \(L_x, L_y, C_{\text{in}}, C_{\text{out}}\).
+
+\subsection{Базовые компоненты архитектуры}
+
+% Self-Attention
+\paragraph{Классический механизм внимания.}
+{\color{red} дописать multi-head attention?}
+Пусть $\mathbf{Q} \in \mathbb{R}^{L_Q \times d_k}$,
+$\mathbf{K} \in \mathbb{R}^{L_K \times d_k}$,
+$\mathbf{V} \in \mathbb{R}^{L_K \times d_v}$ --
+промежуточные представления входных данных, строки которых
+можно интерпретировать как запросы, ключи и значения непрерывной
+словарной структуры данных соответственно~\cite{transformer}, 
+где $L_Q$ и $L_K$ обозначают длину последовательностей запросов и 
+ключей/значений соответственно,
+$d_k$ -- размерность запросов и ключей, 
+а $d_v$ -- размерность значений.
+Двунаправленное (bidirectional, или неориентированное
+(non-directional)~\cite{BERT}) внимание на основе скалярного
+произведения имеет вид:
+\begin{equation}
+    \label{eq:attention}
+    \mathrm{Att}_{\leftrightarrow}(\mathbf{Q}, \mathbf{K}, \mathbf{V}) =
+    \mathrm{softmax}\!\left( \frac{\mathbf{Q}\mathbf{K}^\top}{\sqrt{d_k}} \right)
+    \mathbf{V}
+    \in \mathbb{R}^{L_Q \times d_v},
+\end{equation}
+где $\mathrm{softmax}(\cdot)$ применяется построчно.
+
+Временная и пространственная сложность вычисления~\eqref{eq:attention}
+равны $O(L_Q L_K (d_k + d_v))$ и
+$O(L_Q L_K + L_Q d_k + L_K d_k + L_K d_v)$ соответственно
+(при $L_Q = L_K = L$ и $d_v = d_k$ получаем $O(L^2 d_k)$ по времени
+и $O(L^2 + Ld_k)$ по памяти). Поэтому механизм внимания на основе
+скалярного произведения~\eqref{eq:attention} в принципе
+несовместим с end-to-end-обработкой длинных
+последовательностей. Двунаправленное внимание используется в
+self-attention энкодера и в cross-attention энкодер–декодера
+в архитектурах Seq2Seq.
+
+Другой важный тип внимания -- однонаправленное (unidirectional)
+внимание:
+\begin{equation*}
+    \mathrm{Att}_{\rightarrow}(\mathbf{Q}, \mathbf{K}, \mathbf{V})
+    = \mathrm{softmax}\!\left(
+        \frac{\mathbf{Q}\mathbf{K}^\top}{\sqrt{d_k}} + \mathbf{M}
+    \right)\mathbf{V} \in \mathbb{R}^{L_Q \times d_v},
+\end{equation*}
+где $\mathbf{M} \in \mathbb{R}^{L_Q \times L_K}$ -- маска, элементы
+которой задают, какие логиты участвуют в нормализации
+(элементы, равные $-\infty$, полностью подавляют соответствующие
+ключи для данного запроса). 
+
+Однонаправленное внимание используется в self-attention декодера
+в архитектурах Seq2Seq. В частности, в случае self-attention декодера,
+когда $L_Q = L_K = L$, обычно используют нижнетреугольную каузальную
+маску, задаваемую правилом
+$M_{ij} = 0$ при $j \le i$ и $M_{ij} = -\infty$ при $j > i$.
+
+% FAVOR+
+\paragraph{Аппроксимация softmax-ядер для механизма внимания.}
+{\color{red} TODO}
+
+% Series Decomposition
+\paragraph{Декомпозиция ряда.}
+Следуя Autoformer~\cite{autoformer}, опишем механизм 
+декомпозиции ряда (SeriesDecomp) -- внутреннюю операцию, 
+которая постепенно извлекает долгосрочную трендовую 
+(трендово-циклическую) составляющую из предсказанных 
+промежуточных скрытых представлений. Формально:
+\begin{gather*}
+    \mathcal{X}_t^{(\mathrm{tr})} = \mathrm{MA}_k(\mathcal{X}_t), \\ 
+    \mathcal{X}_t^{(\mathrm{se})} = \mathcal{X}_t - \mathcal{X}_t^{(\mathrm{tr})},
+\end{gather*}
+где $\mathcal{X}_t^{(\mathrm{tr})}, \mathcal{X}_t^{(\mathrm{se})} \in \mathbb{R}^{L_x \times d_{\mathrm{model}}}$ -- 
+трендово-циклическая и сезонная составляющие соответственно, 
+$\mathrm{MA}_k(\cdot)$ -- оператор скользящего среднего 
+(simple moving average) с окном длины $k$, единичным шагом 
+и постоянным дополнением на границах. В дальнейшем будем 
+использовать обозначение
+$
+(\mathcal{X}_t^{(\mathrm{tr})}, \mathcal{X}_t^{(\mathrm{se})}) 
+= \mathrm{SeriesDecomp}(\mathcal{X}_t)
+$
+для краткой записи описанного выше блока.
+
+% Positional / Temporal Embedding
+\paragraph{Представление входных данных.}
+{\color{red} TODO}
+
+% \rule{\linewidth}{0.1mm}
+
+% Self-Attention Distilling
+\paragraph{Дистилляция внимания.}
+{\color{red} TODO}

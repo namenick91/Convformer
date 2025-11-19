@@ -18,8 +18,9 @@
     \includegraphics[width=0.8\textwidth]{main/ConvStem.pdf}
     \caption{Схема блока ConvStem. 
     Здесь: $\mathcal{X}_t \in \mathbb{R}^{L_x \times C_{\text{in}}}, 
-    \mathcal{X}'_t \in \mathbb{R}^{L_x \times d}$, где $d$-размерность модели;
-    \textrm{IN}-нормализация по экземплярам (Instance Normalization~\cite{InstanceNorm}). 
+    \mathcal{X}'_t \in \mathbb{R}^{L_x \times d}$, где $d = d_{\text{model}}$
+    -- размерность модели;
+    \textrm{IN} -- нормализация по экземплярам (Instance Normalization~\cite{InstanceNorm}). 
     Псевдокод приведен в \ref{alg:convstem_pseudocode}.} 
     \label{fig:ConvStemScheme}
 \end{figure}
@@ -101,6 +102,7 @@ Autoformer~\cite{autoformer}. После каждого блока self-attentio
     Блок дистилляции $N^*$ в энкодере ({\color{F6F2AE} жёлтый} блок) включён во все слои, кроме последнего.
     Декодер постепенно накапливает трендовую составляющую, извлекаемую из скрытых переменных.
     Прошлая сезонная информация, полученная от энкодера, используется в классическом (полном) механизме внимания 
+    ({\color{red} ССЫЛКА НА БЛОК С FULL ATTENTION}) 
     (центральный {\color{C5E6AE} зелёный} блок в декодере).}
     \label{fig:ConvformerScheme}
 \end{figure}
