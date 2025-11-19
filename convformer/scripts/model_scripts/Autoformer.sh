@@ -13,6 +13,86 @@ run_autoformer() {
   # local -a PRED_LENS=(24 48 168 336)    # ECL traffic
   # local -a PRED_LENS=(24 36 48 60)      # illness
 
+  # --------------------------------------------------------------------------------------------------------------------
+  # | mixed | mixed |  mixed |  mixed |  mixed |  mixed |  mixed |  mixed |  mixed |  mixed |  mixed |  mixed |  mixed | 
+  # --------------------------------------------------------------------------------------------------------------------
+
+  # Shared args (dataset-specific are injected via the function args above)
+  # ETT setup
+  local -a COMMON_ARGS=(
+    --is_training 1
+    --model Autoformer
+    --root_path "$root_path"
+    --data_path "$data_path"
+    --data "$data"
+    --features MS 
+    --target OT
+    --freq h                 
+    --seq_len 96
+    --label_len 48
+    --e_layers 2
+    --d_layers 1
+    --factor 3 
+    --enc_in 7  
+    --dec_in 7 
+    --c_out 1  
+    --use_torch_compile False
+    --itr 3
+  )
+
+  # exchange_rate setup
+  # local -a COMMON_ARGS=(
+  #   --is_training 1
+  #   --model Autoformer
+  #   --root_path "$root_path"
+  #   --data_path "$data_path"
+  #   --data "$data"
+  #   --features MS 
+  #   --target OT
+  #   --freq h                 
+  #   --seq_len 96
+  #   --label_len 48
+  #   --e_layers 2
+  #   --d_layers 1
+  #   --factor 3 
+  #   --enc_in 8  
+  #   --dec_in 8 
+  #   --c_out 1  
+  #   --use_torch_compile False
+  #   --itr 3
+  # )
+
+  # ----------------------------------------------------------------------------------------------------------------------
+  # | univariate | univariate | univariate | univariate | univariate | univariate | univariate | univariate | univariate |
+  # ----------------------------------------------------------------------------------------------------------------------
+
+  # Shared args (dataset-specific are injected via the function args above)
+  # ETT, exchange_rate setup
+  # local -a COMMON_ARGS=(
+  #   --is_training 1
+  #   --model Autoformer
+  #   --root_path "$root_path"
+  #   --data_path "$data_path"
+  #   --data "$data"
+  #   --features S 
+  #   --target OT
+  #   --freq h                 
+  #   --seq_len 96
+  #   --label_len 48
+  #   --e_layers 2
+  #   --d_layers 1
+  #   --factor 3 
+  #   --enc_in 1  
+  #   --dec_in 1 
+  #   --c_out 1  
+  #   --use_torch_compile False
+  #   --itr 3
+  # )
+
+  # -------------------------------------------------------------------------------------------------------------------------
+  # | multivariate | multivariate | multivariate | multivariate | multivariate | multivariate | multivariate | multivariate | 
+  # -------------------------------------------------------------------------------------------------------------------------
+
   # Shared args (dataset-specific are injected via the function args above)
   # ETT setup
   # local -a COMMON_ARGS=(
@@ -126,36 +206,36 @@ run_autoformer() {
   # )
 
   # weather
-  local -a COMMON_ARGS=(
-    --is_training 1
-    --model Autoformer
-    --root_path "$root_path"
-    --data_path "$data_path"
-    --data "$data"
-    --features M
-    --target OT
-    --freq h                 
-    --seq_len 96
-    --label_len 48
-    --e_layers 2
-    --d_layers 1
-    --factor 3 #
-    --enc_in 21
-    --dec_in 21
-    --c_out 21
-    --use_torch_compile False
-    --itr 3 \
-  )
+  # local -a COMMON_ARGS=(
+  #   --is_training 1
+  #   --model Autoformer
+  #   --root_path "$root_path"
+  #   --data_path "$data_path"
+  #   --data "$data"
+  #   --features M
+  #   --target OT
+  #   --freq h                 
+  #   --seq_len 96
+  #   --label_len 48
+  #   --e_layers 2
+  #   --d_layers 1
+  #   --factor 3 #
+  #   --enc_in 21
+  #   --dec_in 21
+  #   --c_out 21
+  #   --use_torch_compile False
+  #   --itr 3 \
+  # )
 
   # MODEL
   for pl in "${PRED_LENS[@]}"; do
-    local model_id="Autoformer_96_${pl}_weather" # manual change
+    local model_id="Autoformer_96_${pl}_ETTh1" # manual change
     local des="autoformer_${pl}"
 
     local logfile="../logs/autoformer/${model_id}.log"
     mkdir -p "$(dirname "$logfile")"
 
-    echo "==> Running ${des} (data=weather, pred_len=${pl})" # manual change
+    echo "==> Running ${des} (data=ETTh1, pred_len=${pl})" # manual change
     python -u ../run.py \
       "${COMMON_ARGS[@]}" \
       --pred_len "${pl}" \

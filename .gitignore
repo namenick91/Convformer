@@ -9,6 +9,7 @@
 *.bbl
 *.blg
 *.DS_Store
+*.svg
 **/generated/
 **/logs/
 **/checkpoints/

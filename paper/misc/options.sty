@@ -8,6 +8,7 @@
 
 % Packages for math
 \usepackage{amsmath, amssymb, amsthm, bm}
+\usepackage{mathtools}
 % ==================================================
 
 % Packages for writing
@@ -25,6 +26,8 @@
 % ==================================================
 
 % Miscellaneous packages
+\usepackage{algorithm}
+\usepackage{algpseudocode}
 \usepackage{float}
 \usepackage{xifthen}
 \usepackage{adjustbox}
@@ -59,6 +62,10 @@
 \makeatletter
 \newcommand{\midruleb}{\specialrule{\heavyrulewidth}{\aboverulesep}{\belowrulesep}}
 \makeatother
+
+\renewcommand{\Comment}[2][.25\linewidth]{%
+  \leavevmode\hfill\makebox[#1][l]{\(\triangleright\)~#2}}
+
 
 % ==================================================
 
@@ -118,6 +125,11 @@
 \definecolor{myblue}{HTML}{0A88C2}
 \definecolor{myred}{HTML}{FF1B1C}
 \definecolor{mygreen}{HTML}{386641}
+
+\definecolor{BDE5F6}{HTML}{2196DB}
+\definecolor{DDD0F6}{HTML}{7C4DE8}
+\definecolor{F6F2AE}{HTML}{D4C200}
+\definecolor{C5E6AE}{HTML}{4DAE3A}
 
 % define the style for Python code
 \lstdefinestyle{mystyle}{

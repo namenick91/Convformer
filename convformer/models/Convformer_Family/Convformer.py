@@ -11,7 +11,7 @@ class Model(nn.Module):
     Informer with 
         TokenEmbedding replaced with ConvStem;
         series decomposition from Autoformer;
-        Propspare attention replaced with FAVOR+
+        ProbSparse attention replaced with FAVOR+
     """
     def __init__(self, configs):
         super(Model, self).__init__()

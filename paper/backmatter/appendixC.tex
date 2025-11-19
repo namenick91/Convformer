@@ -1,0 +1,44 @@
+\newpage\section{Детали реализации}
+
+\noindent\hspace*{3em}\begin{minipage}{\dimexpr\linewidth-8em}
+\begin{algorithm}[H]
+\caption{Блок ConvStem}
+\label{alg:convstem_pseudocode}
+% \small\sffamily % аккуратный шрифт: чуть меньше, без засечек
+\begin{spacing}{1.25}
+\begin{algorithmic}[1]
+
+\Require входное окно $\mathcal{X}_t \in \mathbb{R}^{B \times L_x \times C_{\text{in}}}$
+\Ensure выход $\mathcal{X}'_t \in \mathbb{R}^{B \times L_x \times d_{\text{model}}}$
+
+\Statex
+
+\State $\mathcal{X}_t \gets \mathtt{Permute}(\mathcal{X}_t)$ 
+\Comment{$\mathcal{X}_t \in \mathbb{R}^{B \times C_{\text{in}} \times L_x}$}
+
+\State $R \gets \mathtt{Conv1D}_{k=1,p=0}(\mathcal{X}_t)$ 
+\Comment{$R \in \mathbb{R}^{B \times d_{\text{model}} \times L_x}$}
+
+\State $H_1 \gets \mathtt{GELU}\,\!\bigl(\mathtt{IN}(\mathtt{Conv1D}_{k=5,p=2}(\mathcal{X}_t))\bigr)$
+\Comment{$H_1 \in \mathbb{R}^{B \times d_{\text{model}} \times L_x}$}
+
+\State $H_2 \gets \mathtt{GELU}\,\!\bigl(\mathtt{IN}(\mathtt{DW\text{-}Conv1D}_{k=3,p=1} (H_1))\bigr)$
+\Comment{$H_2 \in \mathbb{R}^{B \times d_{\text{model}} \times L_x}$}
+
+\State $Z \gets R + H_2$
+\Comment{$Z \in \mathbb{R}^{B \times d_{\text{model}} \times L_x}$}
+
+\State $\mathcal{X}'_t \gets \mathtt{Permute}^{-1}(Z)$
+\Comment{$\mathcal{X}'_t \in \mathbb{R}^{B \times L_x \times d_{\text{model}}}$}
+
+\State \Return $\mathcal{X}'_t$
+
+\end{algorithmic}
+\end{spacing}
+\end{algorithm}
+
+\textit{Комментарий.} Здесь $\mathtt{IN}$ обозначает слой InstanceNorm1d~\cite{InstanceNorm} с обучаемыми
+параметрами (affine = True), а $\mathtt{DW\text{-}Conv1D}$~- глубинную одномерную
+свёртку по временной оси (groups $= d_{\text{model}}$).
+\end{minipage}
+

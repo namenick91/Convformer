@@ -13,7 +13,6 @@ source "${SCRIPT_DIR}/model_scripts/Convformer.sh"
 source "${SCRIPT_DIR}/model_scripts/Performer.sh"
 source "${SCRIPT_DIR}/model_scripts/Informer.sh"
 
-
 # -------------------------------------------------------------
 # | ABLATION1 | ABLATION1 | ABLATION1 | ABLATION1 | ABLATION1 |
 # -------------------------------------------------------------
