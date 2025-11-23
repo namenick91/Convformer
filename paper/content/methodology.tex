@@ -1,10 +1,12 @@
 \section{Методология}
 
-\textbf{Повышение эффективности извлечения локальных паттернов} $\quad$
+\paragraph{Повышение эффективности извлечения локальных паттернов}
+\label{sec:convstem}
 Для усиления способности модели к распознаванию краткосрочных закономерностей мы 
 предлагаем заменить стандартный механизм представления значений в блоке с обработкой 
 входных данных в Informer~\cite{informer}
-на сверточный блок ConvStem, при этом оставив позиционное с темпоральным эмбеддированием. 
+на сверточный блок ConvStem, тогда как позиционное и темпоральное кодирование остаются неизменными
+(см. раздел~\ref{sec:input-representation}). 
 Данный блок сочетает проекцию входных признаков через 
 точечную свёртку с последующими операциями широкой и глубинной свёрток, дополненных 
 нормализацией и нелинейностью. Такое построение позволяет модели фиксировать повторяющиеся 
@@ -21,115 +23,327 @@
     \mathcal{X}'_t \in \mathbb{R}^{L_x \times d}$, где $d = d_{\text{model}}$
     -- размерность модели;
     \textrm{IN} -- нормализация по экземплярам (Instance Normalization~\cite{InstanceNorm}). 
-    Псевдокод приведен в \ref{alg:convstem_pseudocode}.} 
+    Псевдокод приведен в алгоритме~\ref{alg:convstem_pseudocode}.} 
     \label{fig:ConvStemScheme}
 \end{figure}
 
-\textbf{Масштабируемое моделирование глобальных зависимостей} $\quad$
+\paragraph{Масштабируемое моделирование глобальных зависимостей} 
+\label{sec:favor}
+
 В качестве механизма внимания предлагается использовать FAVOR+
 (Performer~\cite{performer}) вместо ProbSparse (оригинально применяемого 
 в Informer~\cite{informer}).
 Подобно тому, как в оригинальном Informer~\cite{informer} 
-механизм FullAttention~\cite{transformer} был
+классический механизм полного внимания FullAttention~\cite{transformer} был
 заменен на ProbSparse исключительно для вычисления self-attention (механизм самовнимания) в 
 слоях кодировщика и декодера, в нашей модификации ProbSparse заменяется 
 на FAVOR+ в тех же местах, тогда как cross-attention останется 
 реализованным через полное внимание (FullAttention).
 Данную замену мы мотивируем тем, что FAVOR+ обеспечивает  
-несмещённую аппроксимацию softmax-ядра с линейной по времени
-и памяти сложностью~\cite{performer}, что гарантирует предсказуемую и масштабируемую
+несмещённую аппроксимацию softmax-ядра с линейными по длине последовательности
+затратами по времени и памяти~\cite{performer}, что гарантирует предсказуемую и масштабируемую
 работу на очень длинных последовательностях в условиях ограниченных
 ресурсов GPU. 
-При этом точность аппроксимации управляется числом случайных признаков $r$: 
-при меньших значениях достигается высокая скорость, при больших - более 
+При этом точность аппроксимации управляется размерностью карты случайных
+признаков $r$: 
+при меньших значениях достигается высокая скорость, при больших -- более 
 точное восстановление распределения внимания. Такая настраиваемость делает механизм 
 универсальным инструментом, позволяющим варьировать баланс между эффективностью и 
 качеством.
 Кроме того, отказ от ручной выборки top-$u$ запросов
 позволяет модели учитывать любые глобальные зависимости, а не только
-наиболее сильные периодические, что критично для учёта 
-непериодичных скачков в реальных временных рядах.
+наиболее сильные периодические, что важно для корректного описания
+непериодических скачков в реальных временных рядах.
 
-\textbf{Явное разделение тренда и сезонности} $\quad$ Чтобы явно разделить тренд и сезонную компоненту, 
-мы интегрировали механизм декомпозиции временных рядов, заимствованный из архитектуры 
-Autoformer~\cite{autoformer}. После каждого блока self-attention
-скрытое представление разлагается на два канала: низкочастотный тренд и остаточную 
-компоненту, содержащую более стационарные сезонные и случайные колебания. Тренд передаётся по 
-остаточному пути, обеспечивая стабильность прогнозов при сдвигах уровня, тогда как внимание 
-применяется к сезонной компоненте, где наиболее выражены периодические и локальные закономерности. 
-Такая стратегия снижает вариативность обучения, повышает способность к экстраполяции за пределами 
-обучающего диапазона и улучшает интерпретируемость результатов за счёт явного выделения трендовой 
-и сезонной составляющих.
+Для практической реализации FAVOR+ мы используем модуль \texttt{Favor} из библиотеки
+\texttt{fast-transformers}~\cite{fast_transformers_repo},
+который представляет собой реализацию положительных
+ортогональных случайных признаков для softmax-ядра 
+(формула (\ref{eq:PRF})).
+ Во всех экспериментах размерность карты
+случайных признаков фиксирована и равна $r = 256$.
 
-\rule{\textwidth}{0.6pt}
-Схема механизма декомпозиции ряда~\cite{autoformer}\\[-5pt] {\color{red} УБРАТЬ/ИЗМЕНИТЬ}
-\rule{\textwidth}{0.4pt}
+\paragraph{Явное разделение тренда и сезонности}
+Следуя Autoformer~\cite{autoformer}, мы интегрируем в архитектуру
+механизм декомпозиции временных рядов (SeriesDecomp) -- внутреннюю
+операцию, которая постепенно извлекает долгосрочную трендовую
+(трендово-циклическую) составляющую из промежуточных скрытых
+представлений. Для скрытого представления
+$\mathcal{X}_t \in \mathbb{R}^{L_x \times d_{\mathrm{model}}}$
+декомпозиция определяется как:
+\begin{gather*}
+    \mathcal{X}_t^{(\mathrm{tr})} = \mathrm{MA}_k(\mathcal{X}_t), \\ 
+    \mathcal{X}_t^{(\mathrm{se})} = \mathcal{X}_t - \mathcal{X}_t^{(\mathrm{tr})},
+\end{gather*}
+где $\mathcal{X}_t^{(\mathrm{tr})}, \mathcal{X}_t^{(\mathrm{se})} 
+\in \mathbb{R}^{L_x \times d_{\mathrm{model}}}$ --
+трендово-циклическая и сезонная составляющие соответственно;
+$\mathrm{MA}_k(\cdot)$ -- оператор скользящего среднего
+(simple moving average) с окном длины $k$, единичным шагом
+и постоянным дополнением на границах. В дальнейшем будем
+использовать обозначение
+\[
+(\mathcal{X}_t^{(\mathrm{tr})}, \mathcal{X}_t^{(\mathrm{se})}) 
+= \mathrm{SeriesDecomp}(\mathcal{X}_t)
+\]
+для краткой записи блока декомпозиции.
 
-\begin{center}
-    \begin{minipage}{0.55\linewidth}
-        \noindent Input: $\text{X}$ \\
-        
-        \noindent (1) [SeriesDecomp] $\rightarrow$ $\text{Trend}$, $\text{Seasonal}$ \\
-        
-        \qquad where \vspace{-30pt} \begin{flalign*}
-            & \hspace{70pt} \text{Trend} = \text{AvgPool}(\text{Padding}(\text{X})) && \\ 
-            & \hspace{70pt} \text{Seasonal} = \text{X} - \text{Trend} 
-        \end{flalign*}
+В архитектуре нашей модели блок SeriesDecomp многократно
+применяется к скрытым представлениям, обеспечивая их разделение
+на два канала: низкочастотный тренд и остаточную 
+компоненту, содержащую более стационарные сезонные и случайные колебания.
+Трендовая часть передаётся по остаточному пути, обеспечивая стабильность
+прогнозов при сдвигах уровня, тогда как внимание применяется к сезонной
+компоненте, где наиболее выражены периодические и локальные закономерности.
+Такая стратегия снижает вариативность обучения, повышает способность
+к экстраполяции за пределы обучающего диапазона и улучшает интерпретируемость
+результатов за счёт раздельного моделирования трендовой и сезонной составляющих.
 
-        \noindent (2) [self-attention mechanism] on $\text{Seasonal}$
-
-        \qquad $\rightarrow$ $\text{Seasonal}'$ (+ residual connection, normalization, etc.) \\ 
-
-        \noindent (3) [Feed-Forward] on $\text{Seasonal}' \rightarrow \widetilde{\text{Seasonal}}$ \\
-        
-        \noindent (4) Re-compose $\text{X} = \widetilde{\text{Seasonal}} + \text{Trend}$
-    \end{minipage}
-\end{center}
-
-\rule{\textwidth}{0.4pt}
+% \rule{\textwidth}{0.4pt}
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width=\textwidth]{main/Convformer.pdf}
     \caption{Архитектура Convformer. Входные данные (для декодера -- их сезонная составляющая) 
     проходят через блок ConvEmbedding ({\color{DDD0F6} фиолетовый} блок), состоящий из 
-    ConvStem, PositionalEmbedding и TemporalEmbedding (подробнее см. 
-    % в разделе~\ref{sec:appendixD}
-    {\color{red} ДОБАВИТЬ ССЫЛКУ НА АППЕНДИКС}
+    ConvStem, позиционного и темпорального кодирований (подробнее см. 
+    в разделе~\ref{sec:input-representation}
     ).
     Энкодер устраняет долгосрочную трендово-циклическую составляющую с помощью блоков декомпозиции рядов 
     ({\color{BDE5F6} синие} блоки) и сосредотачивается на моделировании сезонных компонент.
     Блок дистилляции $N^*$ в энкодере ({\color{F6F2AE} жёлтый} блок) включён во все слои, кроме последнего.
     Декодер постепенно накапливает трендовую составляющую, извлекаемую из скрытых переменных.
     Прошлая сезонная информация, полученная от энкодера, используется в классическом (полном) механизме внимания 
-    ({\color{red} ССЫЛКА НА БЛОК С FULL ATTENTION}) 
+    (см. раздел~\ref{sec:attention}) 
     (центральный {\color{C5E6AE} зелёный} блок в декодере).}
     \label{fig:ConvformerScheme}
 \end{figure}
 
-В итоге архитектура объединяет сильные стороны
-трёх подходов: локальное кодирование паттернов через ConvStem, линейное глобальное внимание 
-FAVOR+ и явную декомпозицию ряда из Autoformer~\cite{autoformer}, 
-сохраняя при этом полную совместимость с остальными гиперпараметрами 
-оригинального Informer~\cite{informer}.
+% \subsection{Энкодер: {\color{red} todo: add small description like in Informer}}
+
+% {\color{red} указать, что FAVOR здесь -- multi-head (с ссылкой на определение multi-head?)}
+
+% {\color{red} добавить размерности}
+
+% Подобно тому, как это реализовано в Autoformer~\cite{autoformer}, 
+% энкодер в нашей модели сосредоточивается на моделировании сезонной составляющей 
+% (см. рис.~\ref{fig:ConvformerScheme}). 
+% Его выход содержит прошлую сезонную информацию и используется 
+% в качестве входа для перекрёстного внимания в декодере, 
+% что позволяет последнему уточнять результаты прогнозирования. 
+
+% Пусть $N$ -- количество слоёв в энкодере, $\mathcal{H}_{t,0}$ -- 
+% эмбеддинговое представление входного окна $\mathcal{X}_t$. Чтобы не перегружать обозначения, 
+% зафиксируем момент времени и опустим индекс $t$, т.е. 
+% $\mathcal{X}_t, \mathcal{H}_{t,0} \Leftrightarrow \mathcal{X}, \mathcal{H}_{0}$. 
+% Тогда работу энкодера на слое $n$ можно описать следующим образом:
+% \begin{align*}
+%     \bigl(\mathcal{H}_{n}^{(\mathrm{att},\mathrm{se})}, 
+%            \mathcal{H}_{n}^{(\mathrm{att},\mathrm{tr})}\bigr)
+%         &= \mathrm{SeriesDecomp}\bigl(\mathrm{FAVOR}(\mathcal{Z}_{n-1}) + \mathcal{Z}_{n-1}\bigr), \qquad &&n \in \{ 1, \dots, N \}, \\
+%     \bigl(\mathcal{H}_{n}^{(\mathrm{ff},\mathrm{se})}, 
+%            \mathcal{H}_{n}^{(\mathrm{ff},\mathrm{tr})}\bigr)
+%         &= \mathrm{SeriesDecomp}\bigl(\mathrm{FF}(\mathcal{H}_{n}^{(\mathrm{att},\mathrm{se})}) 
+%             + \mathcal{H}_{n}^{(\mathrm{att},\mathrm{se})}\bigr), \qquad &&n \in \{ 1, \dots, N \},  \\
+%     \mathcal{H}_{n}^{(\mathrm{dist})} 
+%         &= \mathrm{Distilling}\bigl(\mathcal{H}_{n}^{(\mathrm{ff},\mathrm{se})}\bigr), \qquad &&n \in \{ 1, \dots, N-1 \}.
+% \end{align*}
+% где $(\mathcal{Z}_\nu)_{\nu=0}^{N-1} \coloneq \bigl(\mathcal{H}_0, \mathcal{H}_{1}^{(\mathrm{dist})}, \dots, \mathcal{H}_{N-1}^{(\mathrm{dist})}\bigr)$, 
+% на слое $N$ дистилляция не применяется.
+
+% Здесь $\mathcal{H}_{n}^{(i,j)}, \, j \in \{ \mathrm{se}, \mathrm{tr} \}, \, i \in \{ \mathrm{att}, \mathrm{ff} \}$ -- 
+% сезонные и трендовые компоненты после соответствующих внутренних подпроцессов (self-attention, feed-forward) соответственно,
+% $\mathcal{H}_{n}^{(\mathrm{dist})}$ -- результат блока дистилляции (см. раздел~\ref{sec:distill}) в слое $n$, а
+% $\mathrm{FF}(\cdot)$ обозначает позиционно-независимую 
+% двухслойную полносвязную feed-forward сеть. Трендовые компоненты в слоях энкодера явно не используются. 
+
+% В дальнейшем выходом энкодера считаем сезонную компоненту последнего слоя
+% \[
+%     \mathcal{H}^{(\mathrm{enc})} = \mathcal{H}_{N}^{(\mathrm{ff},\mathrm{se})}.
+% \]
+
+\subsection{Энкодер}
+\label{sec:encoder}
+
+Подобно тому, как это реализовано в Autoformer~\cite{autoformer}, 
+энкодер в нашей модели сосредоточивается на моделировании сезонной составляющей 
+(см. рис.~\ref{fig:ConvformerScheme}). 
+Его выход содержит прошлую сезонную информацию и используется 
+в качестве входа для перекрёстного внимания в декодере, 
+что позволяет последнему уточнять результаты прогнозирования. 
+
+Пусть $N$ -- количество слоёв в энкодере, $\mathcal{H}_{t,0,\mathrm{enc}}$ -- 
+эмбеддинговое представление входного окна $\mathcal{X}_t$. Чтобы не перегружать обозначения, 
+зафиксируем момент времени и опустим индекс $t$, т.е. 
+$\mathcal{X}_t, \mathcal{H}_{t,0,\mathrm{enc}} \Leftrightarrow \mathcal{X}, 
+\mathcal{H}_{0, \mathrm{enc}}$. 
+Тогда работу энкодера на слое $n$ можно описать следующим образом:
+\begin{align*}
+    \bigl(\mathcal{H}_{n, \mathrm{enc}}^{(\mathrm{self},\mathrm{se})}, 
+           \mathcal{H}_{n, \mathrm{enc}}^{(\mathrm{self},\mathrm{tr})}\bigr)
+        &= \mathrm{SeriesDecomp}\bigl(\mathrm{FAVOR}_{\leftrightarrow}(\mathcal{Z}_{n-1}^{(\mathrm{enc})}) + \mathcal{Z}_{n-1}^{(\mathrm{enc})}\bigr), \qquad &&n \in \{ 1, \dots, N \}, \\
+    \bigl(\mathcal{H}_{n, \mathrm{enc}}^{(\mathrm{ff},\mathrm{se})}, 
+           \mathcal{H}_{n, \mathrm{enc}}^{(\mathrm{ff},\mathrm{tr})}\bigr)
+        &= \mathrm{SeriesDecomp}\bigl(\mathrm{FF}(\mathcal{H}_{n, \mathrm{enc}}^{(\mathrm{self},\mathrm{se})}) 
+            + \mathcal{H}_{n, \mathrm{enc}}^{(\mathrm{self},\mathrm{se})}\bigr), \qquad &&n \in \{ 1, \dots, N \},  \\
+    \mathcal{H}_{n, \mathrm{enc}}^{(\mathrm{dist})} 
+        &= \mathrm{Distilling}\bigl(\mathcal{H}_{n, \mathrm{enc}}^{(\mathrm{ff},\mathrm{se})}\bigr), \qquad &&n \in \{ 1, \dots, N-1 \}.
+\end{align*}
+где $(\mathcal{Z}_\nu^{(\mathrm{enc})})_{\nu=0}^{N-1} \coloneq \bigl(\mathcal{H}_0^{(\mathrm{enc})}, \mathcal{H}_{1, \mathrm{enc}}^{(\mathrm{dist})}, \dots, \mathcal{H}_{N-1, \mathrm{enc}}^{(\mathrm{dist})}\bigr)$, 
+на слое $N$ дистилляция не применяется.
+
+Здесь $\mathcal{H}_{n, \mathrm{enc}}^{(i,j)}, \, j \in \{ \mathrm{se}, \mathrm{tr} \}, \, i \in \{ \mathrm{self}, \mathrm{ff} \}$ -- 
+сезонные и трендовые компоненты после соответствующих внутренних подпроцессов (двунаправленного self-attention, feed-forward) соответственно;
+$\mathcal{H}_{n, \mathrm{enc}}^{(\mathrm{dist})}$ -- результат блока дистилляции (см. раздел~\ref{sec:distill}) в слое $n$; 
+$\mathrm{FF}(\cdot)$ обозначает позиционно-независимую 
+двухслойную полносвязную feed-forward сеть;
+$\mathrm{FAVOR}(\cdot)$ 
+-- механизм внимания $\mathrm{FAVOR+}$~\cite{performer} (см. раздел~\ref{sec:favor}).
+Трендовые компоненты в слоях энкодера явно не используются. 
+
+% Self-Attention Distilling
+\paragraph{Дистилляция внимания}
+\label{sec:distill}
+Следуя Informer~\cite{informer}, используем дистилляцию внимания для
+выделения представлений с доминирующими признаками и формирования 
+более сфокусированной карты признаков в следующем слое. Для 
+произвольного скрытого представления $\mathcal{H}_n$ на слое $n$:
+
+\begin{equation*}
+    \mathcal{H}_n^{(\mathrm{dist})} = 
+    \mathrm{MaxPool}(\mathrm{ELU}(\mathrm{BN}(\mathrm{Conv1d}(\mathcal{H}_n)))),
+\end{equation*}
+где $\mathrm{Conv1d}$ обозначает одномерную свертку по времени (с ядром размера 3), 
+$\mathrm{BN}$ -- нормализацию по батчам ($\mathrm{BatchNorm1d}$~\cite{BatchNorm}), 
+$\mathrm{ELU}$ -- функцию активации, а 
+$\mathrm{MaxPool}$ -- одномерное максимальное объединение по времени,
+уменьшающее длину последовательности.
+Для краткой записи блока используем обозначение 
+$\mathcal{H}_n^{(\mathrm{dist})} = \mathrm{Distilling}(\mathcal{H}_n)$.
+
+\subsection{Декодер}
+
+Подобно Autoformer~\cite{autoformer}, на вход декодеру одновременно подаются 
+как сезонная компонента 
+$\mathcal{X}_{t, \mathrm{dec}}^{(\mathrm{se})} \in \mathbb{R}^{(\tfrac{L_x}{2}+L_y)\times C_{\mathrm{in}}}$, 
+так и трендово-циклическая 
+$\mathcal{X}_{t, \mathrm{dec}}^{(\mathrm{tr})} \in \mathbb{R}^{(\tfrac{L_x}{2}+L_y)\times C_{\mathrm{in}}}$, 
+формируемые из входного окна $\mathcal{X}_t$. 
+Аналогично разделу с энкодером (см. раздел~\ref{sec:encoder}), опустим индекс $t$. 
+Формально процесс инициализации декодера можно описать следующим образом:
+\begin{align*}
+    (\mathcal{X}^{(\mathrm{se})}, \mathcal{X}^{(\mathrm{tr})}) &= 
+        \mathrm{SeriesDecomp}(\mathcal{X}), \\
+    \mathcal{X}^{(\mathrm{se})}_{\mathrm{dec}} &= 
+        \mathrm{Concat}(\mathcal{X}^{(\mathrm{se})}_{\{\tfrac{L_x}{2}:L_x\}}, \mathcal{X}_0), \\
+    \mathcal{X}^{(\mathrm{tr})}_{\mathrm{dec}} &= 
+        \mathrm{Concat}(\mathcal{X}^{(\mathrm{tr})}_{\{\tfrac{L_x}{2}:L_x\}}, \bar{\mathcal{X}}), 
+\end{align*}
+где $\mathcal{X}^{(\mathrm{se})}_{\{\tfrac{L_x}{2}:L_x\}}, 
+\mathcal{X}^{(\mathrm{tr})}_{\{\tfrac{L_x}{2}:L_x\}} \in \mathbb{R}^{\tfrac{L_x}{2} \times C_{\mathrm{in}}}$ 
+обозначают последние $\tfrac{L_x}{2}$ элементов сезонной и трендовой составляющих входной последовательности 
+$\mathcal{X}$ соответственно, а 
+$\mathcal{X}_0, \bar{\mathcal{X}} \in \mathbb{R}^{L_y \times C_{\mathrm{in}}}$ -- «заглушки», заполненные, 
+соответственно, нулями и средним по времени исходной последовательности $\mathcal{X}$. 
+
+Пусть $M$ -- количество слоёв в декодере, 
+$\mathcal{H}_{0, \mathrm{dec}}$ -- эмбеддинговое представление входной сезонной последовательности 
+$\mathcal{X}^{(\mathrm{se})}_{\mathrm{dec}}$.
+Тогда работу декодера на слое $m$, $m \in \{ 1, \dots, M \}$ можно описать следующим образом:
+\begin{align*}
+    \bigl(\mathcal{H}_{m,\mathrm{dec}}^{(\mathrm{self},\mathrm{se})},
+           \mathcal{H}_{m,\mathrm{dec}}^{(\mathrm{self},\mathrm{tr})}\bigr)
+        &= \mathrm{SeriesDecomp}\bigl(
+               \mathrm{FAVOR}_{\rightarrow}(\mathcal{Z}_{m-1}^{(\mathrm{dec})})
+               + \mathcal{Z}_{m-1}^{(\mathrm{dec})}
+           \bigr), 
+           \\
+    \bigl(\mathcal{H}_{m,\mathrm{dec}}^{(\mathrm{cross},\mathrm{se})},
+           \mathcal{H}_{m,\mathrm{dec}}^{(\mathrm{cross},\mathrm{tr})}\bigr)
+        &= \mathrm{SeriesDecomp}\bigl(
+               \mathrm{FullAtt}_{\leftrightarrow}\bigl(
+                   \mathcal{H}_{m,\mathrm{dec}}^{(\mathrm{self},\mathrm{se})},
+                   \mathcal{H}_{N,\mathrm{enc}}^{(\mathrm{ff},\mathrm{se})}
+               \bigr)
+               + \mathcal{H}_{m,\mathrm{dec}}^{(\mathrm{self},\mathrm{se})}
+           \bigr),
+           \\
+    \bigl(\mathcal{H}_{m,\mathrm{dec}}^{(\mathrm{ff},\mathrm{se})},
+           \mathcal{H}_{m,\mathrm{dec}}^{(\mathrm{ff},\mathrm{tr})}\bigr)
+        &= \mathrm{SeriesDecomp}\bigl(
+               \mathrm{FF}\bigl(\mathcal{H}_{m,\mathrm{dec}}^{(\mathrm{cross},\mathrm{se})}\bigr)
+               + \mathcal{H}_{m,\mathrm{dec}}^{(\mathrm{cross},\mathrm{se})}
+           \bigr),
+           \\
+    \mathcal{X}_{m, \mathrm{dec}}^{(\mathrm{tr})} 
+        &= \mathcal{X}_{m-1, \mathrm{dec}}^{(\mathrm{tr})} + \mathrm{Proj}\bigl(
+               \mathcal{H}_{m,\mathrm{dec}}^{(\mathrm{self},\mathrm{tr})}
+             + \mathcal{H}_{m,\mathrm{dec}}^{(\mathrm{cross},\mathrm{tr})}
+             + \mathcal{H}_{m,\mathrm{dec}}^{(\mathrm{ff},\mathrm{tr})}
+           \bigr),
+\end{align*}
+
+где $(\mathcal{Z}_\nu^{(\mathrm{dec})})_{\nu=0}^{M-1} \coloneq \bigl(\mathcal{H}_{0, \mathrm{dec}}, \mathcal{H}_{1, \mathrm{dec}}^{(\mathrm{ff}, \mathrm{se})}, \dots, \mathcal{H}_{M-1, \mathrm{dec}}^{(\mathrm{ff}, \mathrm{se})}\bigr)$ 
+и $\,\mathcal{X}_{0, \mathrm{dec}}^{(\mathrm{tr})} = \mathrm{Proj}(\mathcal{X}^{(\mathrm{tr})}_{\mathrm{dec}})$.
+
+% $\mathbf{W}^{(\mathrm{se})} \cdot \mathcal{H}_{M,\mathrm{dec}}^{(\mathrm{ff},\mathrm{se})} + 
+%  \mathcal{H}_{M, \mathrm{dec}}^{(\mathrm{tr})}$ -- финал, где $\mathbf{W}^{(\mathrm{se})}$ -- 
+% проекция в пространство выходных признаков размерности $C_{\mathrm{out}}$.
+
+Здесь $\mathcal{H}_{m,\mathrm{dec}}^{(i,j)}, \; 
+j \in \{\mathrm{se}, \mathrm{tr}\}, \; 
+i \in \{\mathrm{self}, \mathrm{cross}, \mathrm{ff}\}$ 
+-- сезонные и трендовые компоненты после соответствующих внутренних подпроцессов 
+(однонаправленного self-attention, двунаправленного cross-attention и feed-forward); 
+$\mathcal{H}_{N,\mathrm{enc}}^{(\mathrm{ff},\mathrm{se})}$ -- 
+выход энкодера (прошлая сезонная информация); 
+% Операторы $\mathrm{FAVOR}_{\rightarrow}(\cdot)$ и $\mathrm{FAVOR}_{\mathrm{cross}}(\cdot,\cdot)$ 
+% реализуют, соответственно, однонаправленный self-attention в декодере и перекрёстное внимание 
+% декодера к выходу энкодера (см. рис.~\ref{fig:ConvformerScheme}). 
+$\mathrm{Proj}(\cdot)$ -- линейное преобразование по признаковому измерению 
+(свёртка с ядром размера $3$), переводящее суммарную трендовую компоненту текущего слоя в пространство 
+выходных признаков размерности $C_{\mathrm{out}}$;  $\mathrm{FAVOR}(\cdot)$ 
+-- механизм внимания $\mathrm{FAVOR+}$~\cite{performer} (см. раздел~\ref{sec:favor}), 
+$\mathrm{FullAtt}(\cdot)$ -- классический «полный» механизм внимания~\cite{transformer} (см. раздел~\ref{sec:attention}). 
+
+Таким образом, на каждом слое $m$ self-attention и cross-attention работают только с сезонной 
+составляющей, в то время как трендовые компоненты $\mathcal{H}_{m,\mathrm{dec}}^{(\cdot,\mathrm{tr})}$ 
+проецируются и накапливаются. 
+На выходе декодера получаем сезонное представление $\mathcal{H}_{M,\mathrm{dec}}^{(\mathrm{ff},\mathrm{se})}$ и 
+накопленную трендовую часть $\mathcal{X}_{M, \mathrm{dec}}^{(\mathrm{tr})}$, сумма которых 
+даёт итоговый прогноз: 
+\begin{equation*}
+    \mathcal{H}_{M,\mathrm{dec}}^{(\mathrm{ff},\mathrm{se})} \mathcal{W}^{(\mathrm{se})}  + 
+    \mathcal{X}_{M, \mathrm{dec}}^{(\mathrm{tr})} \,\in\, \mathbb{R}^{(\tfrac{L_x}{2}+L_y)\times C_{\mathrm{out}}},
+\end{equation*}
+где $\mathcal{W}^{(\mathrm{se})} \in \mathbb{R}^{d_{\mathrm{model}}\times C_{\mathrm{out}}}$ -- 
+матрица проекции в пространство выходных признаков размерности $C_{\mathrm{out}}$.
+
+В совокупности предложенная архитектура объединяет сильные стороны трёх подходов:
+локальное кодирование паттернов через ConvStem, линейное по длине последовательности
+глобальное внимание FAVOR+ и явную декомпозицию ряда из Autoformer~\cite{autoformer},
+при этом структура основных
+гиперпараметров остаётся совместимой с Informer~\cite{informer}.
+
+% \rule{\linewidth}{0.1mm}
 
 % \begin{center}
 %     \begin{minipage}{0.55\linewidth}
-%         \noindent Input: $\text{H}^{(l-1)}$ \\
+%         \noindent Input: $\text{X}$ \\
         
-%         \noindent (1) [SeriesDecomp] $\rightarrow$ $\text{Trend}^{(l)}$, $\text{Seasonal}^{(l)}$ \\
+%         \noindent (1) [SeriesDecomp] $\rightarrow$ $\text{Trend}$, $\text{Seasonal}$ \\
         
 %         \qquad where \vspace{-30pt} \begin{flalign*}
-%             & \hspace{70pt} \text{Trend}^{(l)} = \text{SMA}(\text{H}^{(l-1)}) && \\ 
-%             & \hspace{70pt} \text{Seasonal}^{(l)} = \text{H}^{(l-1)} - \text{Trend}^{(l)} 
+%             & \hspace{70pt} \text{Trend} = \text{AvgPool}(\text{Padding}(\text{X})) && \\ 
+%             & \hspace{70pt} \text{Seasonal} = \text{X} - \text{Trend} 
 %         \end{flalign*}
 
-%         \noindent (2) [selft-attention mechanism] on $\text{Seasonal}^{(l)}$
+%         \noindent (2) [self-attention mechanism] on $\text{Seasonal}$
 
-%         \qquad $\rightarrow$ $\text{Seasonal}'^{(l)}$ (+ residual connection, normalization, etc.) \\ 
+%         \qquad $\rightarrow$ $\text{Seasonal}'$ (+ residual connection, normalization, etc.) \\ 
 
-%         \noindent (3) [Feed-Forward] on $\text{Seasonal}'^{(l)} \rightarrow \widetilde{\text{Seasonal}}^{(l)}$ \\
+%         \noindent (3) [Feed-Forward] on $\text{Seasonal}' \rightarrow \widetilde{\text{Seasonal}}$ \\
         
-%         \noindent (4) Re-compose $\text{H}^{(l)} = \widetilde{\text{Seasonal}}^{(l)} + \text{Trend}^{(l)}$
+%         \noindent (4) Re-compose $\text{X} = \widetilde{\text{Seasonal}} + \text{Trend}$
 %     \end{minipage}
 % \end{center}

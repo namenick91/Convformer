@@ -1,27 +1,28 @@
 \section{Дополнение к основным результатам}
 
-\subsection{Визуализация абляционных исследований}
+\paragraph{Визуализация абляционных исследований}
 
 % \enlargethispage{2\baselineskip}
 
-Для оценки предсказаний различных моделей приводится визуализация результатов 
-прогнозирования на тестовой выборке набора данных ETTh1 в рамках абляционных исследований, 
-что позволяет провести качественное сравнение.
+Для качественной оценки моделей представлена визуализация прогнозов последней 
+компоненты временного ряда набора данных \textit{ETTh1}~\cite{informer} на тестовой выборке. Показаны результаты 
+для нескольких горизонтов прогнозирования в рамках абляционных исследований, что позволяет 
+наглядно сравнить характер ошибок и способность моделей отслеживать динамику ряда.
 
 % Ablation 1
 % 5 plots (for horizons: {24, 48, 168, 336, 720}) model A
 % 5 plots (for horizons: {24, 48, 168, 336, 720}) model B
 
-\begin{table}[H]
+\begin{table}[h!]
     \centering
     \caption{Примеры прогнозирования из набора данных ETTh1 в ходе абляционных исследований 
     \textit{ConvStem вместо TokenEmbedding} (см. раздел~\ref{sec:ablations1}) в настройках 
-    \texttt{input-96-predict-horizon}. {\color{blue} Синие} линии - истинные значения, 
-    {\color{orange} оранжевые} линии - предсказания модели, {\color{green} зеленые} - входные данные 
+    \texttt{input-96-predict-horizon}. {\color{blue} Синие} линии -- истинные значения, 
+    {\color{orange} оранжевые} линии -- предсказания модели, {\color{green} зеленые} -- входные данные 
     длиной 96. }
     \vspace{5pt}
     \label{tab:ablations1}
-    \resizebox{0.98\textwidth}{!}{
+    \resizebox{0.80\textwidth}{!}{
     \setlength{\tabcolsep}{4pt}        % adjust horizontal padding
     \renewcommand{\arraystretch}{1.5}  % big body‐row spacing
     \begin{tabular}{lccccc}
@@ -56,20 +57,20 @@
     \end{tabular}
     }
 \end{table}
-% \vspace{-40pt}
+\vspace{-23pt}
 
 % Ablation 2
 % 5 plots (for horizons: {24, 48, 168, 336, 720}) model A
 % 5 plots (for horizons: {24, 48, 168, 336, 720}) model B
 
-\begin{table}[H]
+\begin{table}[h!]
     \centering
     \caption{Примеры прогнозирования из набора данных ETTh1 в ходе абляционных исследований 
     \textit{ProbSparse $\to$ FAVOR+} (см. раздел~\ref{sec:ablations2}) в настройках 
     \texttt{input-96-predict-horizon}.}
     \vspace{5pt}
     \label{tab:ablations2}
-    \resizebox{0.98\textwidth}{!}{
+    \resizebox{0.80\textwidth}{!}{
     \setlength{\tabcolsep}{4pt}        % adjust horizontal padding
     \renewcommand{\arraystretch}{1.5}  % big body‐row spacing
     \begin{tabular}{lccccc}
@@ -104,21 +105,21 @@
     \end{tabular}
     }
 \end{table}
-% \vspace{-40pt}
-\vfill\newpage
+\vspace{-23pt}
+% \vfill\newpage
 
 % Ablation 3
 % 5 plots (for horizons: {24, 48, 168, 336, 720}) model A
 % 5 plots (for horizons: {24, 48, 168, 336, 720}) model B
 
-\begin{table}[H]
+\begin{table}[h!]
     \centering
     \caption{Примеры прогнозирования из набора данных ETTh1 в ходе абляционных исследований 
     \textit{Informer с модулем декомпозиции} (см. раздел~\ref{sec:ablations3}) в настройках 
     \texttt{input-96-predict-horizon}.}
     \vspace{5pt}
     \label{tab:ablations3}
-    \resizebox{0.98\textwidth}{!}{
+    \resizebox{0.80\textwidth}{!}{
     \setlength{\tabcolsep}{4pt}        % adjust horizontal padding
     \renewcommand{\arraystretch}{1.5}  % big body‐row spacing
     \begin{tabular}{lccccc}
@@ -154,46 +155,46 @@
     }
 \end{table}
 
-\subsection{Визуализация основных результатов}
+% \subsection{Визуализация основных результатов}
 
-% Main
-% 4 plots (for horizons: 336) Convformer, Informer, Performer, Autoformer
+% % Main
+% % 4 plots (for horizons: 336) Convformer, Informer, Performer, Autoformer
 
-\begin{figure}[h!]
-    \centering
-    % First image
-    \begin{subfigure}[b]{0.24\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{main/336A.pdf}
-        \caption{Convformer}
-        \label{fig:img1}
-    \end{subfigure}
-    % Second image
-    \begin{subfigure}[b]{0.24\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{main/336B.pdf}
-        \caption{Informer}
-        \label{fig:img2}
-    \end{subfigure}
-    % Third image
-    \begin{subfigure}[b]{0.24\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{main/336C.pdf}
-        \caption{Performer}
-        \label{fig:img3}
-    \end{subfigure}
-    % Fourth image
-    \begin{subfigure}[b]{0.24\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{main/336D.pdf}
-        \caption{Autoformer}
-        \label{fig:img4}
-    \end{subfigure}
+% \begin{figure}[h!]
+%     \centering
+%     % First image
+%     \begin{subfigure}[b]{0.24\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{main/336A.pdf}
+%         \caption{Convformer}
+%         \label{fig:img1}
+%     \end{subfigure}
+%     % Second image
+%     \begin{subfigure}[b]{0.24\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{main/336B.pdf}
+%         \caption{Informer}
+%         \label{fig:img2}
+%     \end{subfigure}
+%     % Third image
+%     \begin{subfigure}[b]{0.24\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{main/336C.pdf}
+%         \caption{Performer}
+%         \label{fig:img3}
+%     \end{subfigure}
+%     % Fourth image
+%     \begin{subfigure}[b]{0.24\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{main/336D.pdf}
+%         \caption{Autoformer}
+%         \label{fig:img4}
+%     \end{subfigure}
     
-    \caption{Примеры прогнозирования из набора данных ETTh1 в настройках 
-    \texttt{input-96-predict-336}.}
-    \label{fig:four_images}
-\end{figure}
+%     \caption{Примеры прогнозирования из набора данных ETTh1 в настройках 
+%     \texttt{input-96-predict-336}.}
+%     \label{fig:four_images}
+% \end{figure}
 
 % \enlargethispage{2\baselineskip}
 % \begin{table}[H]

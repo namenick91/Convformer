@@ -17,29 +17,29 @@ run_convformer() {
   # | mixed | mixed |  mixed |  mixed |  mixed |  mixed |  mixed |  mixed |  mixed |  mixed |  mixed |  mixed |  mixed | 
   # --------------------------------------------------------------------------------------------------------------------
 
-  # Shared args (dataset-specific are injected via the function args above)
-  # ETT setup
-  local -a COMMON_ARGS=(
-    --is_training 1
-    --model Convformer
-    --root_path "$root_path"
-    --data_path "$data_path"
-    --data "$data"
-    --features MS 
-    --target OT
-    --freq h
-    --seq_len 96
-    --label_len 48
-    --e_layers 2
-    --d_layers 1
-    --factor 3 
-    --num_rand_features 256 
-    --enc_in 7  
-    --dec_in 7 
-    --c_out 1  
-    --use_torch_compile False
-    --itr 3
-  )
+  # # Shared args (dataset-specific are injected via the function args above)
+  # # ETT setup
+  # local -a COMMON_ARGS=(
+  #   --is_training 1
+  #   --model Convformer
+  #   --root_path "$root_path"
+  #   --data_path "$data_path"
+  #   --data "$data"
+  #   --features MS 
+  #   --target OT
+  #   --freq h
+  #   --seq_len 96
+  #   --label_len 48
+  #   --e_layers 2
+  #   --d_layers 1
+  #   --factor 3 
+  #   --num_rand_features 256 
+  #   --enc_in 7  
+  #   --dec_in 7 
+  #   --c_out 1  
+  #   --use_torch_compile False
+  #   --itr 3
+  # )
 
   # exchange_rate setup
   # local -a COMMON_ARGS=(
@@ -70,27 +70,27 @@ run_convformer() {
 
   # Shared args (dataset-specific are injected via the function args above)
   # ETT, exchange_rate setup
-  # local -a COMMON_ARGS=(
-  #   --is_training 1
-  #   --model Convformer
-  #   --root_path "$root_path"
-  #   --data_path "$data_path"
-  #   --data "$data"
-  #   --features S 
-  #   --target OT
-  #   --freq h
-  #   --seq_len 96
-  #   --label_len 48
-  #   --e_layers 2
-  #   --d_layers 1
-  #   --factor 3 
-  #   --num_rand_features 256 
-  #   --enc_in 1  
-  #   --dec_in 1 
-  #   --c_out 1  
-  #   --use_torch_compile False
-  #   --itr 3
-  # )
+  local -a COMMON_ARGS=(
+    --is_training 1
+    --model Convformer
+    --root_path "$root_path"
+    --data_path "$data_path"
+    --data "$data"
+    --features S 
+    --target OT
+    --freq h
+    --seq_len 96
+    --label_len 48
+    --e_layers 2
+    --d_layers 1
+    --factor 3 
+    --num_rand_features 256 
+    --enc_in 1  
+    --dec_in 1 
+    --c_out 1  
+    --use_torch_compile False
+    --itr 3
+  )
 
   # -------------------------------------------------------------------------------------------------------------------------
   # | multivariate | multivariate | multivariate | multivariate | multivariate | multivariate | multivariate | multivariate | 

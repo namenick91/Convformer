@@ -1,5 +1,7 @@
 \newpage\section{Детали реализации}
 
+В настоящем разделе фиксируем ключевые детали реализации Convformer.
+
 \noindent\hspace*{3em}\begin{minipage}{\dimexpr\linewidth-8em}
 \begin{algorithm}[H]
 \caption{Блок ConvStem}
@@ -36,9 +38,72 @@
 \end{algorithmic}
 \end{spacing}
 \end{algorithm}
-
+\vspace{-10pt}
 \textit{Комментарий.} Здесь $\mathtt{IN}$ обозначает слой InstanceNorm1d~\cite{InstanceNorm} с обучаемыми
-параметрами (affine = True), а $\mathtt{DW\text{-}Conv1D}$~- глубинную одномерную
-свёртку по временной оси (groups $= d_{\text{model}}$).
+параметрами (affine = True), $\mathtt{DW\text{-}Conv1D}$~-- глубинную одномерную
+свёртку по временной оси (groups $= d_{\text{model}}$), а $\mathrm{GELU}$ -- функцию активации.
 \end{minipage}
 
+\vspace{10pt}
+
+\begin{table}[!ht]
+    \centering
+    \begin{adjustbox}{max width=\textwidth, max totalheight=\textheight, keepaspectratio}
+    \begin{tabular}{l|l|c}
+        \toprule
+        \multicolumn{2}{l}{\textbf{Encoder:}} & $N$ \\
+        \midrule
+        Inputs
+            & ConvEmbedding $(d_{\mathrm{model}} = 512)$
+            &  \\[2pt]
+        \cmidrule(lr){1-2}
+        \multirow{2}{*}{FAVOR+ } 
+            & Multi-head FAVOR$+$ attention ($h=8$, $d_k=64$, $r=256$)
+            & \multirow{6}{*}{$2$} \\
+         \multirow{2}{*}{self-attention block}  
+            & Add, SeriesDecomp ($k=25$), Dropout ($p=0.05$)
+            & \\
+         \multirow{2}{*}{ \& decomposition}   
+            & Pos-wise FFN ($d_{ff}=2048$), RELU
+            & \\
+            & Add, SeriesDecomp ($k=25$), Dropout ($p=0.05$)
+            & \\[2pt]
+        \cmidrule(lr){1-2}
+        \multirow{2}{*}{Distilling}
+            & Conv1d ($k=3, p=2$), BatchNorm1d
+            &  \\
+            & ELU, MaxPool1d ($k=3, p=1, s=2$)
+            & \\
+        \midrule
+        \multicolumn{2}{l}{\textbf{Decoder:}} & $M$ \\
+        \midrule
+        Inputs
+            & ConvEmbedding $(d_{\mathrm{model}} = 512)$
+            & \\[2pt]
+        \cmidrule(lr){1-2}
+        FAVOR+ self-attention block
+            & Multi-head FAVOR+ attention ($h=8, d_k=64, r=256$) + Mask
+            & \\[2pt]
+        \cmidrule(lr){1-2}
+            \multirow{2}{*}{Full Attention} & Multi-head Attention ($h=8, d_k=64$)
+            & \multirow{2}{*}{1} \\
+            \multirow{2}{*}{cross-attention block}
+            & Add, SeriesDecomp ($k=25$), Dropout ($p=0.05$)
+            & \\
+            \multirow{2}{*}{\& decomposition} 
+            & Pos-wise FFN ($d_{ff}=2048$), RELU
+            & \\
+            & Add, SeriesDecomp ($k=25$), Dropout ($p=0.05$)
+            & \\[2pt]
+        \midrule
+        \multicolumn{2}{l}{\textbf{Final:}} &  \\ 
+        \midrule
+        Outputs
+            & Seasonal part $+$ trend part, Linear $(d_{\mathrm{model}} \rightarrow C_{\mathrm{out}})$
+            & \\
+        \bottomrule
+    \end{tabular}
+    \end{adjustbox}
+    \vspace{5pt}
+    \caption{Гиперпараметры и конфигурация архитектуры предлагаемой модели (Convformer).}
+\end{table}

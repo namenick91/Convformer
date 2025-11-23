@@ -41,7 +41,6 @@
 \usepackage{listings}
 \usepackage[margin=1.25cm]{caption}
 \usepackage{cite}
-\usepackage{hyperref}
 \usepackage{subcaption}
 \usepackage{graphicx}
 \usepackage{url}
@@ -49,6 +48,8 @@
 \usepackage[framemethod=TikZ]{mdframed}
 \usepackage{framed}
 \usepackage{makecell}
+\usepackage{hyperref}
+
 % load an additional tikz library
 \usetikzlibrary{shapes.geometric}
 % ==================================================
@@ -66,6 +67,7 @@
 \renewcommand{\Comment}[2][.25\linewidth]{%
   \leavevmode\hfill\makebox[#1][l]{\(\triangleright\)~#2}}
 
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
 
 % ==================================================
 

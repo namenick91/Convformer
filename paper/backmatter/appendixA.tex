@@ -1,9 +1,11 @@
 \newpage\section{Полный бенчмарк}
 
+\label{sec:appendixA}
+
 % big table with everything (only MSE/MAE)
 \begin{table}[!ht]
     \centering
-    \begin{adjustbox}{max width=\textwidth, max totalheight=\textheight, keepaspectratio}
+    \begin{adjustbox}{max width=1\textwidth, max totalheight=\textheight, keepaspectratio}
     \begin{tabular}{c|c|*{7}{c|}c}
         \toprule
         \multicolumn{2}{c|}{Models}
@@ -89,8 +91,15 @@
     \end{tabular}
     \end{adjustbox}
     \vspace{3pt}
-    \caption{Comparison of forecasting models across multiple datasets (MSE and MAE). 
-    \textcolor{red}{Note: input length and predicted feature count vary by dataset.}}
+    \caption{Результаты многомерного прогнозирования 
+    на семи датасетах (ETTh1, ETTh2, ECL, Exchange, Illness, Traffic, Weather) 
+    при различных горизонтах предсказаний 
+    $\{24, 48, 168, 336, 720\}$ (для Illness: $\{24, 36, 48, 60\}$). 
+    Входная длина последовательности фиксирована: 96. 
+    Число прогнозируемых признаков зависит от датасета. 
+    Наилучшие результаты по каждому датасету, горизонту и метрике 
+    выделены полужирным. Символ «--» обозначает выход за пределы памяти 
+    (OOM).}
     \label{tab:multi-dataset-results}
 \end{table}
 
