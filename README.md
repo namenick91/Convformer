@@ -26,7 +26,7 @@ The architecture addresses the limitations of existing LSTF models (sensitivity 
 *   **Input Representation:** Uses **ConvStem** (combining point-wise and depth-wise convolutions with Instance Normalization) instead of simple token embeddings to capture short-term motifs immediately.
 *   **Encoder:** Focuses on modeling the **seasonal component**. It uses FAVOR+ self-attention and Series Decomposition to eliminate long-term trends from intermediate representations.
 *   **Decoder:** Accumulates the **trend component** extracted from hidden states while refining the seasonal prediction using full cross-attention with the encoder's output.
-*   **Efficiency:** The use of FAVOR+ (Fast Attention Via positive Orthogonal Random features) ensures predictable scalability ($O(L)$) for very long sequences, unlike the $O(L^2)$  of canonical Transformers or $O(L \log L)$ of Informer.
+*   **Efficiency:** The use of FAVOR+ (Fast Attention Via positive Orthogonal Random features) ensures predictable scalability ( $O(L)$ ) for very long sequences, unlike the $O(L^2)$  of canonical Transformers or $O(L \log L)$ of Informer.
 
 ## Get Started
 
@@ -62,16 +62,19 @@ Convformer demonstrates consistent improvements over Informer and Performer acro
 ## Limitations
 
 As discussed in the paper:
-*   **Quadratic Cross-Attention:** While self-attention is linear (FAVOR+), the cross-attention mechanism in the decoder remains full-attention ($O(L^2)$) to ensure precision, limiting maximum theoretical scalability compared to a fully linear model.
+*   **Quadratic Cross-Attention:** While self-attention is linear (FAVOR+), the cross-attention mechanism in the decoder remains full-attention ( $O(L^2)$ ) to ensure precision, limiting maximum theoretical scalability compared to a fully linear model.
 *   **Hyperparameter Scope:** The configuration (ranks, kernel sizes) was not exhaustively searched; results are based on a fixed set of parameters derived from baselines.
-*   **Random Feature Sensitivity:** No systematic study was conducted on the impact of the number of random features ($r$) or the specific map type beyond the chosen configuration.
+*   **Random Feature Sensitivity:** No systematic study was conducted on the impact of the number of random features ( $r$ ) or the specific map type beyond the chosen configuration.
 *   **Uncertainty:** The model provides point forecasts (deterministic) and does not currently estimate predictive intervals.
 
 ## Acknowledgement
 
 We appreciate the following open-source repositories for their code bases and datasets:
 
-*   [Autoformer](https://github.com/thuml/Autoformer)
-*   [Informer2020](https://github.com/zhouhaoyi/Informer2020)
-*   [Fast-Transformers](https://github.com/idiap/fast-transformers)
-*   [ETDataset](https://github.com/zhouhaoyi/ETDataset)
+https://github.com/thuml/Autoformer
+
+https://github.com/zhouhaoyi/Informer2020
+
+https://github.com/idiap/fast-transformers
+
+https://github.com/zhouhaoyi/ETDataset
